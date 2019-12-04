@@ -4,10 +4,7 @@ import 'package:flutter/services.dart';
 import 'cheat_sheet/cheat_sheet_widget.dart';
 import 'gui/main_ui.dart';
 
-void main() {
-
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -25,15 +22,12 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         accentColor: Color.fromRGBO(245, 130, 37, 1),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -41,8 +35,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     TabBarDemo(),
     CheatSheetWidget(),
