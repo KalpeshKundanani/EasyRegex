@@ -1,3 +1,8 @@
+import 'package:easy_regex/gui/regex_output_widget.dart';
+import 'package:easy_regex/gui/tabs/contains_widget.dart';
+import 'package:easy_regex/gui/tabs/ends_with_widget.dart';
+import 'package:easy_regex/gui/tabs/starts_with_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,9 +19,9 @@ class MyApp extends StatelessWidget {
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Color.fromRGBO(48, 48, 48, 1)
-    ));
-    return MaterialApp(debugShowCheckedModeBanner: false,
+        systemNavigationBarColor: Color.fromRGBO(48, 48, 48, 1)));
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -28,17 +33,57 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
-  static List<Widget> _widgetOptions = <Widget>[
-    TabBarDemo(),
-    CheatSheetWidget(),
-  ];
+  List<Widget> get _widgetOptions => <Widget>[
+        Stack(
+          children: <Widget>[
+            kIsWeb
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Expanded(
+                          child: Column(
+                        children: <Widget>[
+                          Text(
+                            'Starts With',
+                            style: Theme.of(context).textTheme.title,
+                          ),
+                          StartsWithWidget(),
+                        ],
+                      )),
+                      Expanded(
+                          child: Column(
+                        children: <Widget>[
+                          Text(
+                            'Contains',
+                            style: Theme.of(context).textTheme.title,
+                          ),
+                          ContainsWidget(),
+                        ],
+                      )),
+                      Expanded(
+                          child: Column(
+                        children: <Widget>[
+                          Text(
+                            'Ends With',
+                            style: Theme.of(context).textTheme.title,
+                          ),
+                          EndsWithWidget(),
+                        ],
+                      )),
+                    ],
+                  )
+                : TabBarDemo(),
+            RegExOutputWidget(),
+          ],
+        ),
+        CheatSheetWidget(),
+      ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -49,6 +94,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('RegEx'),
+      ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),

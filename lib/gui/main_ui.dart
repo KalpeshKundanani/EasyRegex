@@ -1,4 +1,5 @@
-import 'package:easy_regex/gui/regex_output_widget.dart';
+import 'package:easy_regex/gui/tabs/contains_widget.dart';
+import 'package:easy_regex/gui/tabs/ends_with_widget.dart';
 import 'package:easy_regex/gui/tabs/starts_with_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,16 +15,10 @@ class TabBarDemo extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('RegEx'),
           actions: _actions,
           bottom: _tabBar,
         ),
-        body: Stack(
-          children: <Widget>[
-            _tabBarView,
-            RegExOutputWidget(),
-          ],
-        ),
+        body: _tabBarView,
       ),
     );
   }
@@ -33,10 +28,10 @@ class TabBarDemo extends StatelessWidget {
       ];
 
   TabBarView get _tabBarView => TabBarView(
-        children: [
+        children: <Widget>[
           StartsWithWidget(),
-          Icon(Icons.directions_transit),
-          Icon(Icons.directions_bike),
+          ContainsWidget(),
+          EndsWithWidget(),
         ],
       );
 
