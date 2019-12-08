@@ -172,7 +172,6 @@ class ContainsWidget extends StatelessWidget {
                   onChanged: (bool value) {
                     checkNotifier.value =
                         value ? Contains.does_not_contain : Contains.none;
-                    containsCheckNotifier.value = <ContainsText>{};
                   },
                 ),
               ],

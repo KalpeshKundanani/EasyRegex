@@ -172,7 +172,6 @@ class EndsWithWidget extends StatelessWidget {
                   onChanged: (bool value) {
                     checkNotifier.value =
                         value ? EndsWith.does_not_contain : EndsWith.none;
-                    endsWithCheckNotifier.value = <EndsWithText>{};
                   },
                 ),
               ],

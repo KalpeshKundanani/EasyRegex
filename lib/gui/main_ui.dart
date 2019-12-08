@@ -1,12 +1,9 @@
 import 'package:easy_regex/gui/tabs/contains_widget.dart';
 import 'package:easy_regex/gui/tabs/ends_with_widget.dart';
 import 'package:easy_regex/gui/tabs/starts_with_widget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'match_on_choice_widget.dart';
-
-final ValueNotifier<String> regexValueListenable = ValueNotifier<String>('');
 
 class TabBarDemo extends StatelessWidget {
   @override

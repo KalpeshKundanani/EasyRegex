@@ -1,13 +1,7 @@
+import 'package:easy_regex/gui/regex_value_manager.dart';
 import 'package:flutter/material.dart';
 
 class MatchOnChoiceWidget extends StatelessWidget {
-  final ValueNotifier<String> _matchOnListenable =
-      ValueNotifier<String>(_matchOn.elementAt(0));
-  static const _matchOn = <String>[
-    'Match on words',
-    'Match on Lines',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -16,28 +10,29 @@ class MatchOnChoiceWidget extends StatelessWidget {
         builder: (BuildContext context, value, Widget child) {
           return Row(
             mainAxisSize: MainAxisSize.min,
-            children: _matchOn.map((String match) {
+            children: matchOn.entries.map((MapEntry entry) {
+              MatchOn match = entry.key;
               return InkWell(
-                onTap: () => _matchOnListenable.value = match,
+                onTap: () => matchOnListenable.value = match,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Radio<String>(
+                    Radio<MatchOn>(
                       activeColor: Theme.of(context).accentColor,
                       value: match,
-                      groupValue: _matchOnListenable.value,
-                      onChanged: (String value) {
-                        _matchOnListenable.value = value;
+                      groupValue: matchOnListenable.value,
+                      onChanged: (MatchOn value) {
+                        matchOnListenable.value = value;
                       },
                     ),
-                    Text(match),
+                    Text(match.name),
                   ],
                 ),
               );
             }).toList(growable: false),
           );
         },
-        valueListenable: _matchOnListenable,
+        valueListenable: matchOnListenable,
       ),
     );
   }
