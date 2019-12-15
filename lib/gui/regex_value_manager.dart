@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-final ValueNotifier<String> regexValueListenable = ValueNotifier<String>('');
-
 final ValueNotifier<MatchOn> matchOnListenable =
     ValueNotifier<MatchOn>(MatchOn.words);
 

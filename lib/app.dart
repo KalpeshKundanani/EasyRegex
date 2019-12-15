@@ -1,77 +1,88 @@
 import 'package:easy_regex/pages/cheat_sheet/cheat_sheet_widget.dart';
-import 'package:easy_regex/pages/create_regex_widget.dart';
-import 'package:easy_regex/pages/test_regex_widget.dart';
+import 'package:easy_regex/pages/create_regex/create_regex_widget.dart';
+import 'package:easy_regex/pages/test_regex/test_regex_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+final Color _accentColor = Color.fromRGBO(245, 130, 37, 1);
+
 class EasyRegExApp extends StatefulWidget {
   @override
-  _EasyRegExAppState createState() => _EasyRegExAppState();
+  _EasyRegExAppState createState() {
+    _systemSettings();
+    return _EasyRegExAppState();
+  }
 }
 
 class _EasyRegExAppState extends State<EasyRegExApp> {
   int _pageSelection = 0;
 
   @override
-  Widget build(BuildContext context) {
-    _systemSettings();
-    final Color accentColor = Color.fromRGBO(245, 130, 37, 1);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        accentColor: accentColor,
-      ),
-      home: Scaffold(
-        resizeToAvoidBottomPadding: false,
-        appBar: AppBar(
-          title: Text('Easy RegEx'),
+  Widget build(BuildContext context) => MaterialApp(
+        theme: _themeData,
+        home: Scaffold(
+          appBar: _appBar,
+          body: _currentPage,
+          bottomNavigationBar: _bottomNavigationBar,
+          resizeToAvoidBottomPadding: false,
         ),
-        body: _appPages.elementAt(_pageSelection).body,
-        bottomNavigationBar: BottomNavigationBar(
-          items: _appPages
-              .map((AppPage page) => page.bottomNavigationBarItem)
-              .toList(),
-          currentIndex: _pageSelection,
-          selectedItemColor: accentColor,
-          onTap: (int index) {
-            setState(() {
-              _pageSelection = index;
-            });
-          },
-        ),
-      ),
-    );
-  }
+        debugShowCheckedModeBanner: false,
+      );
 
-  void _systemSettings() {
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Color.fromRGBO(48, 48, 48, 1)));
-  }
+  ThemeData get _themeData => ThemeData(
+        brightness: Brightness.dark,
+        accentColor: _accentColor,
+      );
+
+  AppBar get _appBar => AppBar(title: Text('Easy RegEx'));
+
+  Widget get _currentPage => _appPages.elementAt(_pageSelection).body;
+
+  BottomNavigationBar get _bottomNavigationBar => BottomNavigationBar(
+        items: _navigablePages,
+        currentIndex: _pageSelection,
+        selectedItemColor: _accentColor,
+        onTap: (int index) {
+          setState(() {
+            _pageSelection = index;
+          });
+        },
+      );
+
+  List<BottomNavigationBarItem> get _navigablePages =>
+      _appPages.map((_AppPage page) => page.navigationBarItem).toList();
 }
 
 @immutable
-class AppPage {
-  final BottomNavigationBarItem bottomNavigationBarItem;
+class _AppPage {
+  final BottomNavigationBarItem navigationBarItem;
   final Widget body;
 
-  const AppPage(this.bottomNavigationBarItem, this.body);
+  const _AppPage({this.navigationBarItem, this.body});
 }
 
-List<AppPage> _appPages = <AppPage>[
-  AppPage(
-    BottomNavigationBarItem(icon: Icon(Icons.edit), title: Text('Create')),
-    CreateRegExWidget(),
+final List<_AppPage> _appPages = <_AppPage>[
+  _AppPage(
+    body: CreateRegExWidget(),
+    navigationBarItem:
+        BottomNavigationBarItem(icon: Icon(Icons.edit), title: Text('Create')),
   ),
-  AppPage(
-    BottomNavigationBarItem(icon: Icon(Icons.code), title: Text('Test')),
-    TestRegExWidget(),
+  _AppPage(
+    body: TestRegExWidget(),
+    navigationBarItem:
+        BottomNavigationBarItem(icon: Icon(Icons.code), title: Text('Test')),
   ),
-  AppPage(
-    BottomNavigationBarItem(icon: Icon(Icons.list), title: Text('Cheat Sheet')),
-    CheatSheetWidget(),
+  _AppPage(
+    body: CheatSheetWidget(),
+    navigationBarItem: BottomNavigationBarItem(
+        icon: Icon(Icons.list), title: Text('Cheat Sheet')),
   ),
 ];
+
+void _systemSettings() {
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Color.fromRGBO(48, 48, 48, 1)));
+}
