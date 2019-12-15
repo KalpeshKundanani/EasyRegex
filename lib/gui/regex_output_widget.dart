@@ -1,4 +1,6 @@
+import 'package:easy_regex/gui/regex_value_manager.dart';
 import 'package:easy_regex/regex_change_notifier_provider.dart';
+import 'package:easy_regex/utils.dart';
 import 'package:flutter/material.dart';
 
 class RegExOutputWidget extends StatelessWidget {
@@ -6,51 +8,101 @@ class RegExOutputWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final ValueNotifier<String> regexValueNotifier =
         _regexValueNotifier(context);
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
     return Card(
         child: Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _regexOutputView(regexValueNotifier),
-          _copyRegexButton(regexValueNotifier),
-          _shareRegexButton(regexValueNotifier),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              _copyRegexButton(context, regexValueNotifier),
+              _shareRegexButton(regexValueNotifier),
+            ],
+          ),
+          _regexOutputView(textTheme, regexValueNotifier),
+          _matchOnSelectionWidget(textTheme, themeData),
         ],
       ),
     ));
+  }
+
+  Padding _matchOnSelectionWidget(TextTheme textTheme, ThemeData themeData) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Text(
+            'Match on : ',
+            style: textTheme.caption,
+          ),
+          Expanded(
+            child: RadioListTile<MatchOn>(
+              activeColor: themeData.accentColor,
+              title: Text(
+                MatchOn.words.name,
+                style: textTheme.subtitle,
+              ),
+              value: MatchOn.words,
+              groupValue: MatchOn.words,
+              onChanged: (MatchOn value) {},
+            ),
+          ),
+          Expanded(
+            child: RadioListTile<MatchOn>(
+              activeColor: themeData.accentColor,
+              title: Text(
+                MatchOn.lines.name,
+                style: textTheme.subtitle,
+              ),
+              value: MatchOn.lines,
+              groupValue: MatchOn.words,
+              onChanged: (MatchOn value) {},
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   ValueNotifier<String> _regexValueNotifier(BuildContext context) =>
       RegexChangeNotifierProvider.of(context).regexValueNotifier;
 
   ValueListenableBuilder<String> _regexOutputView(
-          ValueNotifier<String> regexValueNotifier) =>
+    final TextTheme textTheme,
+    final ValueNotifier<String> regexValueNotifier,
+  ) =>
       ValueListenableBuilder<String>(
         valueListenable: regexValueNotifier,
-        builder: _regexTextBuilder,
+        builder: (_, final String value, __) => Padding(
+          padding:
+              const EdgeInsets.only(top: 8, bottom: 8, left: 16, right: 16),
+          child: Text(
+            regexValueNotifier.value,
+            style: textTheme.display1,
+          ),
+        ),
       );
-
-  final ValueWidgetBuilder<String> _regexTextBuilder =
-      (BuildContext context, String value, Widget child) => Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(value),
-            ),
-          );
 
   IconButton _shareRegexButton(ValueNotifier<String> regexValueNotifier) =>
       IconButton(
         icon: Icon(Icons.share),
         onPressed: () {
-          regexValueNotifier.value = 'Share';
+          shareText(regexValueNotifier.value);
         },
       );
 
-  IconButton _copyRegexButton(ValueNotifier<String> regexValueNotifier) =>
+  IconButton _copyRegexButton(final BuildContext context,
+          ValueNotifier<String> regexValueNotifier) =>
       IconButton(
         icon: Icon(Icons.content_copy),
         onPressed: () {
-          regexValueNotifier.value = 'Copy';
+          copyToClipBoard(context, regexValueNotifier.value);
         },
       );
 }

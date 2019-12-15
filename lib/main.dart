@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(
       RegexChangeNotifierProvider(
-        regexValueNotifier: ValueNotifier<String>(''),
+        child: EasyRegExApp(),
+        regexValueNotifier: ValueNotifier<String>('(?i)<td[^>]*>'),
         testRegexNotifier: ValueNotifier<String>(''),
         testTextNotifier:
             ValueNotifier<String>(test_text_provider.dummyTestText),
         testRegexSelectionNotifier:
             ValueNotifier<RegexTestChoice>(RegexTestChoice.newRegex),
-        child: EasyRegExApp(),
       ),
     );

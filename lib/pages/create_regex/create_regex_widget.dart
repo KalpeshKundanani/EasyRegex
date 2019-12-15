@@ -26,6 +26,7 @@ class _CreateRegExWidgetState extends State<CreateRegExWidget>
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           RegExOutputWidget(),
           TabBar(isScrollable: true, controller: _tabController, tabs: _tabs),

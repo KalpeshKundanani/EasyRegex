@@ -4,8 +4,8 @@ final ValueNotifier<MatchOn> matchOnListenable =
     ValueNotifier<MatchOn>(MatchOn.words);
 
 const matchOn = <MatchOn, String>{
-  MatchOn.words: 'Match on words',
-  MatchOn.lines: 'Match on Lines',
+  MatchOn.words: 'Words',
+  MatchOn.lines: 'Lines',
 };
 
 const matchOnRegExStart = <MatchOn, String>{

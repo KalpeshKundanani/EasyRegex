@@ -24,9 +24,9 @@ extension ContainsExtention on Contains {
 }
 
 class ContainsWidget extends StatelessWidget {
-  ValueNotifier<Contains> checkNotifier =
+  final ValueNotifier<Contains> checkNotifier =
       ValueNotifier<Contains>(Contains.anything);
-  ValueNotifier<Set<ContainsText>> containsCheckNotifier =
+  final ValueNotifier<Set<ContainsText>> containsCheckNotifier =
       ValueNotifier<Set<ContainsText>>(<ContainsText>{});
 
   @override
