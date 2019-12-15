@@ -1,10 +1,20 @@
 import 'package:easy_regex/regex_change_notifier_provider.dart';
+import 'package:easy_regex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:highlight_text/highlight_text.dart';
 
 enum RegexTestChoice { createdRegex, newRegex }
 
 class TestRegExWidget extends StatelessWidget {
+  static final ValueNotifier<String> _testRegexNotifier =
+      ValueNotifier<String>(r"[as]");
+  static final TextEditingController _controller = TextEditingController();
+  static final ValueNotifier<String> _testTextNotifier =
+      ValueNotifier<String>('Aas jd kfha jkf h12 32 1 21');
+  static final ValueNotifier<RegexTestChoice> _testRegexSelectionNotifier =
+      ValueNotifier<RegexTestChoice>(RegexTestChoice.createdRegex);
+
   @override
   Widget build(BuildContext context) {
     final ValueNotifier<String> regexValueNotifier =
@@ -22,19 +32,44 @@ class TestRegExWidget extends StatelessWidget {
   }
 
   Widget _regexTestTextWidget(BuildContext context) {
-    final ValueNotifier<String> testTextNotifier = _testTextNotifier(context);
     return Expanded(
       child: Column(
         children: <Widget>[
           Expanded(
             child: ValueListenableBuilder<String>(
-              valueListenable: testTextNotifier,
+              valueListenable: _testRegexNotifier,
               builder: (BuildContext context, String value, Widget child) {
-                return SingleChildScrollView(
-                    child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(value),
-                ));
+                return FutureBuilder<Map<String, HighlightedWord>>(
+                  future: _highlightAccordingToRegex(value),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasError) {
+                      print(snapshot.error);
+                      return Text(
+                        'Error parsing regex',
+                        style: TextStyle(color: Colors.redAccent),
+                      );
+                    }
+                    if (snapshot.hasData) {
+                      return ValueListenableBuilder<String>(
+                        valueListenable: _testTextNotifier,
+                        builder:
+                            (BuildContext context, String value, Widget child) {
+                          return SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextHighlight(
+                                text: value,
+                                words: snapshot.data,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  },
+                );
               },
             ),
           ),
@@ -45,7 +80,10 @@ class TestRegExWidget extends StatelessWidget {
                 scale: 0.75,
                 child: FloatingActionButton.extended(
                   icon: Icon(Icons.content_paste),
-                  onPressed: () {},
+                  onPressed: () async {
+                    _testTextNotifier.value = await pasteFromClipBoard();
+                    showSnackBar(context, 'Updated test text.');
+                  },
                   label: Text('Paste'),
                 ),
               ),
@@ -78,9 +116,8 @@ class TestRegExWidget extends StatelessWidget {
     final ValueNotifier<String> regexValueNotifier,
   ) {
     final Color activeColor = Theme.of(context).accentColor;
-    var testRegexSelectionNotifier = _testRegexSelectionNotifier(context);
     return ValueListenableBuilder(
-      valueListenable: testRegexSelectionNotifier,
+      valueListenable: _testRegexSelectionNotifier,
       builder: (_, final RegexTestChoice groupValue, __) {
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -89,7 +126,7 @@ class TestRegExWidget extends StatelessWidget {
                 (selection) => selection.toRadioListTile(
                   activeColor,
                   groupValue,
-                  (value) => testRegexSelectionNotifier.value = value,
+                  (value) => _testRegexSelectionNotifier.value = value,
                 ),
               )
               .toList(growable: false),
@@ -100,49 +137,45 @@ class TestRegExWidget extends StatelessWidget {
 
   Widget _regexUtils(
       final BuildContext context, ValueNotifier<String> regexValueNotifier) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ValueListenableBuilder(
-        valueListenable: _testRegexSelectionNotifier(context),
-        builder: (_, final RegexTestChoice groupValue, __) {
-          final testRegexNotifier = _testRegexNotifier(context);
-          return ValueListenableBuilder(
-            valueListenable: testRegexNotifier,
-            builder: (_, String newRegexValue, __) {
-              final bool shallCopyOrShare =
-                  groupValue == RegexTestChoice.newRegex &&
-                      newRegexValue.isNotEmpty;
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  IconButton(
-                    onPressed: () {
-                      testRegexNotifier.value = 'paste';
-                    },
-                    icon: Icon(Icons.content_paste),
-                  ),
-                  IconButton(
-                    onPressed: shallCopyOrShare
-                        ? () {
-                            testRegexNotifier.value = 'copy';
-                          }
-                        : null,
-                    icon: Icon(Icons.content_copy),
-                  ),
-                  IconButton(
-                    onPressed: shallCopyOrShare
-                        ? () {
-                            testRegexNotifier.value = 'share';
-                          }
-                        : null,
-                    icon: Icon(Icons.share),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      ),
+    return ValueListenableBuilder(
+      valueListenable: _testRegexSelectionNotifier,
+      builder: (_, final RegexTestChoice groupValue, __) {
+        return ValueListenableBuilder(
+          valueListenable: _testRegexNotifier,
+          builder: (_, String newRegexValue, __) {
+            final bool shallCopyOrShare =
+                groupValue == RegexTestChoice.newRegex &&
+                    _controller.text.isNotEmpty;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                IconButton(
+                  onPressed: () async {
+                    _controller.text = await pasteFromClipBoard();
+                  },
+                  icon: Icon(Icons.content_paste),
+                ),
+                IconButton(
+                  onPressed: shallCopyOrShare
+                      ? () {
+                          copyToClipBoard(context, _controller.text);
+                        }
+                      : null,
+                  icon: Icon(Icons.content_copy),
+                ),
+                IconButton(
+                  onPressed: shallCopyOrShare
+                      ? () {
+                          shareText(_controller.text);
+                        }
+                      : null,
+                  icon: Icon(Icons.share),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -150,27 +183,47 @@ class TestRegExWidget extends StatelessWidget {
           final ValueNotifier<String> regexValueNotifier) =>
       Text(regexValueNotifier.value);
 
+  static FocusNode myFocusNode = FocusNode();
+  final GlobalKey<FormState> _formStateKey = GlobalKey<FormState>();
+
   Widget _newRegexInputWidget(
       final BuildContext context, final RegexTestChoice groupValue) {
-    return ValueListenableBuilder(
-      valueListenable: _testRegexNotifier(context),
-      builder: (BuildContext context, String value, Widget child) =>
-          TextFormField(key: ValueKey(value), initialValue: value),
+    return ValueListenableBuilder<RegexTestChoice>(
+      valueListenable: _testRegexSelectionNotifier,
+      builder: (BuildContext context, RegexTestChoice selection, Widget child) {
+        if (selection == RegexTestChoice.newRegex)
+          FocusScope.of(context).requestFocus(myFocusNode);
+        return Form(
+          key: _formStateKey,
+          child: TextFormField(
+            controller: _controller,
+            focusNode: myFocusNode,
+            enabled: selection == RegexTestChoice.newRegex,
+            onSaved: (String value) {
+              _testRegexNotifier.value = value;
+            },
+            onChanged: (String value) {
+              if (_formStateKey.currentState.validate()) {
+                _formStateKey.currentState.save();
+              }
+            },
+            validator: _regexValidator,
+            decoration: InputDecoration(
+                suffix: InkWell(
+              child: Icon(Icons.clear),
+              onTap: () {
+                _controller.clear();
+                _testRegexNotifier.value = '';
+              },
+            )),
+          ),
+        );
+      },
     );
   }
 
-  ValueNotifier<String> _testTextNotifier(BuildContext context) =>
-      RegexChangeNotifierProvider.of(context).testTextNotifier;
-
   ValueNotifier<String> _regexValueNotifier(BuildContext context) =>
       RegexChangeNotifierProvider.of(context).regexValueNotifier;
-
-  ValueNotifier<RegexTestChoice> _testRegexSelectionNotifier(
-          BuildContext context) =>
-      RegexChangeNotifierProvider.of(context).testRegexSelectionNotifier;
-
-  ValueNotifier<String> _testRegexNotifier(BuildContext context) =>
-      RegexChangeNotifierProvider.of(context).testRegexNotifier;
 
   List<_RegexTestSelection> _testSelections(
           final BuildContext context,
@@ -186,6 +239,41 @@ class TestRegExWidget extends StatelessWidget {
           RegexTestChoice.newRegex,
         ),
       ];
+
+  Future<Map<String, HighlightedWord>> _highlightAccordingToRegex(
+      String value) async {
+    try {
+      String data = _testTextNotifier.value;
+      RegExp exp = new RegExp(value);
+      print(exp.hasMatch(data));
+      Iterable<RegExpMatch> matches = exp.allMatches(data);
+      print(matches);
+      TextStyle highlightedWordTextStyle = TextStyle(color: Colors.amber);
+      Map<String, HighlightedWord> words = <String, HighlightedWord>{};
+      for (int i = 0; i < matches.length; i++) {
+        String word = matches.elementAt(i).group(0);
+        print(word);
+        words[word] = HighlightedWord(
+          onTap: () {},
+          textStyle: highlightedWordTextStyle,
+        );
+      }
+      print(words.keys);
+      return words;
+    } catch (e, s) {
+      print('$e $s');
+    }
+    return null;
+  }
+
+  String _regexValidator(String value) {
+    try {
+      RegExp(value);
+      return null;
+    } catch (e) {
+      return 'Invalid Regex.';
+    }
+  }
 }
 
 @immutable

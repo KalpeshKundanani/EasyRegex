@@ -31,42 +31,51 @@ class RegExOutputWidget extends StatelessWidget {
     ));
   }
 
-  Padding _matchOnSelectionWidget(TextTheme textTheme, ThemeData themeData) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Text(
-            'Match on : ',
-            style: textTheme.caption,
-          ),
-          Expanded(
-            child: RadioListTile<MatchOn>(
-              activeColor: themeData.accentColor,
-              title: Text(
-                MatchOn.words.name,
-                style: textTheme.subtitle,
+  Widget _matchOnSelectionWidget(TextTheme textTheme, ThemeData themeData) {
+    return ValueListenableBuilder<MatchOn>(
+      valueListenable: matchOnListenable,
+      builder: (_, MatchOn value, __) {
+        return Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Text(
+                'Match on : ',
+                style: textTheme.caption,
               ),
-              value: MatchOn.words,
-              groupValue: MatchOn.words,
-              onChanged: (MatchOn value) {},
-            ),
-          ),
-          Expanded(
-            child: RadioListTile<MatchOn>(
-              activeColor: themeData.accentColor,
-              title: Text(
-                MatchOn.lines.name,
-                style: textTheme.subtitle,
+              Expanded(
+                child: RadioListTile<MatchOn>(
+                  activeColor: themeData.accentColor,
+                  title: Text(
+                    MatchOn.words.name,
+                    style: textTheme.subtitle,
+                  ),
+                  value: MatchOn.words,
+                  groupValue: value,
+                  onChanged: (MatchOn value) {
+                    matchOnListenable.value = MatchOn.words;
+                  },
+                ),
               ),
-              value: MatchOn.lines,
-              groupValue: MatchOn.words,
-              onChanged: (MatchOn value) {},
-            ),
+              Expanded(
+                child: RadioListTile<MatchOn>(
+                  activeColor: themeData.accentColor,
+                  title: Text(
+                    MatchOn.lines.name,
+                    style: textTheme.subtitle,
+                  ),
+                  value: MatchOn.lines,
+                  groupValue: value,
+                  onChanged: (MatchOn value) {
+                    matchOnListenable.value = MatchOn.lines;
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

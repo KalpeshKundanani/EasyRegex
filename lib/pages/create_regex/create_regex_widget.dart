@@ -1,4 +1,4 @@
-import 'package:easy_regex/gui/regex_output_widget.dart';
+import 'package:easy_regex/pages/create_regex/regex_output_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'tabs/contains_widget.dart';
