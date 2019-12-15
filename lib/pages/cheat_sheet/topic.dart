@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -14,36 +15,21 @@ class Topic {
 }
 
 const List<Topic> topics = const [
-  Topic('Quantifires', <String, String>{
-    '.':'Any Character',
-    '*':'Zero or more',
-    '+':'One or more',
-    '?':'Zerio or one',
-    '{n}':'n times',
-    '{n,}':'n or more',
-    '{n,m}':'n to m times',
-  }),
-  Topic('Character Classes', <String, String>{
-    '\\d':'Digit',
-    '\\D':'Not digit',
-    '\\w':'word',
-    '\\W':'Not word',
-    '\\s':'Whitespace',
-    '\\S':'Non-whitespace',
-    '\\c':'Control char',
-  }),
-  Topic('Anchors',<String, String>{
-    '^': 'Start of line/string',
-    '\$': 'End of line/string',
-    '\\A': 'Start of string only',
-    '\\Z':'End of string only',
-    '\\b': 'Word boundry',
-    '\\B': 'Non-word boundry',
-  }),
   Topic('Metacharacters escaped with \'\\\'', <String, String>{
-    '<([{\^-=\$!|]})?*+.>':''
+    '<  (  [  {  \^  -  =  \$  !  |  ]  }  )  ?  *  +  .  >': ''
   }),
-  Topic('Groups and Ranges',<String, String>{
+  Topic('Special Groups\nAnd Characters', <String, String>{
+    '[:upper:]': 'Uppercase',
+    '[:lower:]': 'Lowercase',
+    '[:alpha:]': 'Any letter',
+    '[:digit:]': 'Number',
+    '[:alphanum:]': 'Letter or num',
+    '[:space:]': 'Blank char',
+    '[:graph:]': 'Printed char',
+    '[:word:]': 'Letter, _, digit',
+    '[:cntrl:]': 'Control char',
+  }),
+  Topic('Groups\nAnd\nRanges', <String, String>{
     '[abc]': 'Range(a,b or c)',
     '[^abc]': 'Not a,b or c',
     '[a-f]': 'Any char a through f',
@@ -53,15 +39,30 @@ const List<Topic> topics = const [
     '?!': 'Negative lookahead',
     '?<!': 'Negative lookbehind',
   }),
-  Topic('Special groups and characters',<String, String>{
-    '[:upper:]':'Uppercase',
-    '[:lower:]':'Lowercase',
-    '[:alpha:]':'Any letter',
-    '[:digit:]':'Number',
-    '[:alphanum:]':'Letter or num',
-    '[:space:]':'Blank char',
-    '[:graph:]':'Printed char',
-    '[:word:]':'Letter, _, digit',
-    '[:cntrl:]':'Control char',
+  Topic('Quantifires', <String, String>{
+    '.': 'Any Character',
+    '*': 'Zero or more',
+    '+': 'One or more',
+    '?': 'Zerio or one',
+    '{n}': 'n times',
+    '{n,}': 'n or more',
+    '{n,m}': 'n to m times',
+  }),
+  Topic('Anchors', <String, String>{
+    '^': 'Start of line/string',
+    '\$': 'End of line/string',
+    '\\A': 'Start of string only',
+    '\\Z': 'End of string only',
+    '\\b': 'Word boundry',
+    '\\B': 'Non-word boundry',
+  }),
+  Topic('Character Classes', <String, String>{
+    '\\d': 'Digit',
+    '\\D': 'Not digit',
+    '\\w': 'word',
+    '\\W': 'Not word',
+    '\\s': 'Whitespace',
+    '\\S': 'Non-whitespace',
+    '\\c': 'Control char',
   }),
 ];
