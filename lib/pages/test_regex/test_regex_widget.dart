@@ -2,16 +2,24 @@ import 'package:easy_regex/regex_change_notifier_provider.dart';
 import 'package:easy_regex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:highlight_text/highlight_text.dart';
 
 enum RegexTestChoice { createdRegex, newRegex }
 
 class TestRegExWidget extends StatelessWidget {
   static final ValueNotifier<String> _testRegexNotifier =
-      ValueNotifier<String>(r"[as]");
+      ValueNotifier<String>(r"<[^>]*>");
   static final TextEditingController _controller = TextEditingController();
   static final ValueNotifier<String> _testTextNotifier =
-      ValueNotifier<String>('Aas jd kfha jkf h12 32 1 21');
+      ValueNotifier<String>('''<!DOCTYPE html>
+<html>
+<body>
+
+<p>This is a paragraph.</p>
+<p>This is a paragraph.</p>
+<p>This is a paragraph.</p>
+
+</body>
+</html>''');
   static final ValueNotifier<RegexTestChoice> _testRegexSelectionNotifier =
       ValueNotifier<RegexTestChoice>(RegexTestChoice.createdRegex);
 
@@ -39,7 +47,7 @@ class TestRegExWidget extends StatelessWidget {
             child: ValueListenableBuilder<String>(
               valueListenable: _testRegexNotifier,
               builder: (BuildContext context, String value, Widget child) {
-                return FutureBuilder<Map<String, HighlightedWord>>(
+                return FutureBuilder<List<TextSpan>>(
                   future: _highlightAccordingToRegex(value),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (snapshot.hasError) {
@@ -57,9 +65,8 @@ class TestRegExWidget extends StatelessWidget {
                           return SingleChildScrollView(
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: TextHighlight(
-                                text: value,
-                                words: snapshot.data,
+                              child: RichText(
+                                text: TextSpan(children: snapshot.data),
                               ),
                             ),
                           );
@@ -240,30 +247,61 @@ class TestRegExWidget extends StatelessWidget {
         ),
       ];
 
-  Future<Map<String, HighlightedWord>> _highlightAccordingToRegex(
+  Future<List<TextSpan>> _highlightAccordingToRegex(
       String value) async {
     try {
       String data = _testTextNotifier.value;
       RegExp exp = new RegExp(value);
       print(exp.hasMatch(data));
       Iterable<RegExpMatch> matches = exp.allMatches(data);
-      print(matches);
-      TextStyle highlightedWordTextStyle = TextStyle(color: Colors.amber);
-      Map<String, HighlightedWord> words = <String, HighlightedWord>{};
+      List<String> toBeHighlightedWords = <String>[];
       for (int i = 0; i < matches.length; i++) {
         String word = matches.elementAt(i).group(0);
-        print(word);
-        words[word] = HighlightedWord(
-          onTap: () {},
-          textStyle: highlightedWordTextStyle,
-        );
+        toBeHighlightedWords.add(word);
       }
-      print(words.keys);
-      return words;
+      return _getHighlightedWords(data, toBeHighlightedWords);
     } catch (e, s) {
       print('$e $s');
     }
     return null;
+  }
+
+  List<TextSpan> _getHighlightedWords(String text, List<String> toBeHighlighted){
+    List<TextSpan> _textSpans = <TextSpan>[];
+    TextStyle nonHighlight = TextStyle(color: Colors.black);
+    TextStyle highlight = TextStyle(color: Colors.blue);
+    int index = 0;
+    toBeHighlighted.forEach((String string) {
+      int indexOfHighlight = text.indexOf(string);
+      try {
+        String nonHighlightedString = text.substring(index, indexOfHighlight);
+        print('X $nonHighlightedString index: $index, indexOfHighlight: $indexOfHighlight');
+        _textSpans
+            .add(TextSpan(text: nonHighlightedString, style: nonHighlight));
+      } catch (e) {
+        // print('$e ');
+      }
+      print('=======================================');
+      index = indexOfHighlight + string.length;
+      try {
+        String highlightedString = text.substring(indexOfHighlight, index);
+        print('+ $highlightedString  indexOfHighlight: $indexOfHighlight, index: $index');
+        // print(highlightedString);
+        _textSpans.add(TextSpan(text: highlightedString, style: highlight));
+        // text = text.substring(indexOfHighlight);
+        // text = text.substring(index);
+      } catch (e) {
+        // print('$e');
+      }
+      text=text.substring(index);
+      index = 0;
+      print('~~~~~~~~~~~~~~~ $text ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    });
+    if(text.isNotEmpty){
+      _textSpans
+            .add(TextSpan(text: text, style: nonHighlight));
+    }
+    return _textSpans;
   }
 
   String _regexValidator(String value) {
