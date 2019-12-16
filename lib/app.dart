@@ -32,6 +32,8 @@ class _EasyRegExAppState extends State<EasyRegExApp> {
   ThemeData get _themeData => ThemeData(
         brightness: Brightness.dark,
         accentColor: _accentColor,
+        cursorColor: _accentColor,
+        textSelectionHandleColor: _accentColor,
       );
 
   AppBar get _appBar => AppBar(title: Text('Easy RegEx'));

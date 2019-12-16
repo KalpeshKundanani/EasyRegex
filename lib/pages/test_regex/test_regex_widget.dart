@@ -3,25 +3,19 @@ import 'package:easy_regex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import 'test_text.dart';
+
 enum RegexTestChoice { createdRegex, newRegex }
 
 class TestRegExWidget extends StatelessWidget {
   static final ValueNotifier<String> _testRegexNotifier =
-      ValueNotifier<String>(r"<[^>]*>");
-  static final TextEditingController _controller = TextEditingController();
+      ValueNotifier<String>("<[^>]*>");
+  static final TextEditingController _controller =
+      TextEditingController(text: "<[^>]*>");
   static final ValueNotifier<String> _testTextNotifier =
-      ValueNotifier<String>('''<!DOCTYPE html>
-<html>
-<body>
-
-<p>This is a paragraph.</p>
-<p>This is a paragraph.</p>
-<p>This is a paragraph.</p>
-
-</body>
-</html>''');
+      ValueNotifier<String>(dummyTestText);
   static final ValueNotifier<RegexTestChoice> _testRegexSelectionNotifier =
-      ValueNotifier<RegexTestChoice>(RegexTestChoice.createdRegex);
+      ValueNotifier<RegexTestChoice>(RegexTestChoice.newRegex);
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +36,14 @@ class TestRegExWidget extends StatelessWidget {
   Widget _regexTestTextWidget(BuildContext context) {
     return Expanded(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
             child: ValueListenableBuilder<String>(
               valueListenable: _testRegexNotifier,
               builder: (BuildContext context, String value, Widget child) {
                 return FutureBuilder<List<TextSpan>>(
-                  future: _highlightAccordingToRegex(value),
+                  future: _highlightAccordingToRegex(context, value),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (snapshot.hasError) {
                       print(snapshot.error);
@@ -133,7 +128,15 @@ class TestRegExWidget extends StatelessWidget {
                 (selection) => selection.toRadioListTile(
                   activeColor,
                   groupValue,
-                  (value) => _testRegexSelectionNotifier.value = value,
+                  (value) {
+                    if (value == RegexTestChoice.newRegex) {
+                      _testRegexNotifier.value = _controller.text;
+                    } else {
+                      _testRegexNotifier.value =
+                          _regexValueNotifier(context).value;
+                    }
+                    _testRegexSelectionNotifier.value = value;
+                  },
                 ),
               )
               .toList(growable: false),
@@ -248,58 +251,51 @@ class TestRegExWidget extends StatelessWidget {
       ];
 
   Future<List<TextSpan>> _highlightAccordingToRegex(
-      String value) async {
-    try {
-      String data = _testTextNotifier.value;
-      RegExp exp = new RegExp(value);
-      print(exp.hasMatch(data));
-      Iterable<RegExpMatch> matches = exp.allMatches(data);
-      List<String> toBeHighlightedWords = <String>[];
-      for (int i = 0; i < matches.length; i++) {
-        String word = matches.elementAt(i).group(0);
-        toBeHighlightedWords.add(word);
-      }
-      return _getHighlightedWords(data, toBeHighlightedWords);
-    } catch (e, s) {
-      print('$e $s');
+    BuildContext context,
+    String value,
+  ) async {
+    String data = _testTextNotifier.value;
+    RegExp exp = new RegExp(value);
+    print(exp.hasMatch(data));
+    Iterable<RegExpMatch> matches = exp.allMatches(data);
+    List<String> toBeHighlightedWords = <String>[];
+    for (int i = 0; i < matches.length; i++) {
+      String word = matches.elementAt(i).group(0);
+      toBeHighlightedWords.add(word);
     }
-    return null;
+    return _getHighlightedWords(context, data, toBeHighlightedWords);
   }
 
-  List<TextSpan> _getHighlightedWords(String text, List<String> toBeHighlighted){
+  List<TextSpan> _getHighlightedWords(
+      BuildContext context, String text, List<String> toBeHighlighted) {
     List<TextSpan> _textSpans = <TextSpan>[];
-    TextStyle nonHighlight = TextStyle(color: Colors.black);
-    TextStyle highlight = TextStyle(color: Colors.blue);
+    final TextStyle nonHighlight = Theme.of(context).textTheme.body2;
+    final TextStyle highlight = TextStyle(
+        color: Theme.of(context).accentColor,
+        fontSize: Theme.of(context).textTheme.body2.fontSize,
+        backgroundColor: Theme.of(context).accentColor.withAlpha(50));
     int index = 0;
     toBeHighlighted.forEach((String string) {
       int indexOfHighlight = text.indexOf(string);
       try {
         String nonHighlightedString = text.substring(index, indexOfHighlight);
-        print('X $nonHighlightedString index: $index, indexOfHighlight: $indexOfHighlight');
         _textSpans
             .add(TextSpan(text: nonHighlightedString, style: nonHighlight));
       } catch (e) {
         // print('$e ');
       }
-      print('=======================================');
       index = indexOfHighlight + string.length;
       try {
         String highlightedString = text.substring(indexOfHighlight, index);
-        print('+ $highlightedString  indexOfHighlight: $indexOfHighlight, index: $index');
-        // print(highlightedString);
         _textSpans.add(TextSpan(text: highlightedString, style: highlight));
-        // text = text.substring(indexOfHighlight);
-        // text = text.substring(index);
       } catch (e) {
         // print('$e');
       }
-      text=text.substring(index);
+      text = text.substring(index);
       index = 0;
-      print('~~~~~~~~~~~~~~~ $text ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     });
-    if(text.isNotEmpty){
-      _textSpans
-            .add(TextSpan(text: text, style: nonHighlight));
+    if (text.isNotEmpty) {
+      _textSpans.add(TextSpan(text: text, style: nonHighlight));
     }
     return _textSpans;
   }
