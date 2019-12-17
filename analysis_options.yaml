@@ -1,0 +1,26 @@
+# Author Kalpesh Kundanani
+# Date: 17-12-2019
+
+include: package:pedantic/analysis_options.yaml
+
+linter:
+  rules:
+    - camel_case_types #// forces camel case on variable names
+    - always_declare_return_types #// forces declaring return type for every method
+    - annotate_overrides #// forces the use of @override annotation when needed
+    - empty_constructor_bodies #// forces elimination of empty constructor body
+    - slash_for_doc_comments #// forces to use /// comments instead of /** comments for documentation
+    - unnecessary_brace_in_string_interps #// forces to omit additional braces in string interpolations, e.g. ${var} -> $var
+    - prefer_single_quotes #// forces the use of single quote strings rather than usual double quotes
+    - flutter_style_todos #// forces to use flutter style TODOs.e.g. // TODO (hjoshi): Demo TO DO
+    - prefer_final_fields #// forces to use final fields when declaring a practically immutable/unchanging variable
+    - prefer_final_in_for_each #// forces declaring variable as final in the for in loop
+    - prefer_final_locals #// forces to use final for local variable which are not modified later
+    - public_member_api_docs #// forces to declare documentation for api member variables(public)
+    - prefer_iterable_whereType #// forces `whereType` Operator instead of `where` operator
+    - always_specify_types #// forces to provide value type instead of just 'final', 'const' or 'var'
+    - iterable_contains_unrelated_type #// warns about accessing invalid type from a type defined collection, ex. list.contains('1'), where list = List<int>();
+    - avoid_relative_lib_imports #// forces absolute package path instead of relative path
+analyzer:
+#   exclude:
+#     - path/to/excluded/files/**

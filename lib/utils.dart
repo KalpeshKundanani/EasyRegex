@@ -25,3 +25,5 @@ void showSnackBar(BuildContext context, String message) {
     content: Text(message),
   ));
 }
+
+EdgeInsets get defaultPadding => const EdgeInsets.all(8.0);

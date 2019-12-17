@@ -1,4 +1,4 @@
-String dummyTestText = '''<!DOCTYPE html>
+const String dummyTestText = '''<!DOCTYPE html>
 <html>
 <body>
 
@@ -8,3 +8,5 @@ String dummyTestText = '''<!DOCTYPE html>
 
 </body>
 </html>''';
+
+const String defaultRegexForTest = "<[^>]*>";

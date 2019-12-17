@@ -8,21 +8,17 @@ import 'test_text.dart';
 enum RegexTestChoice { createdRegex, newRegex }
 
 class TestRegExWidget extends StatelessWidget {
-  static final ValueNotifier<String> _testRegexNotifier =
-      ValueNotifier<String>("<[^>]*>");
-  static final TextEditingController _controller =
-      TextEditingController(text: "<[^>]*>");
-  static final ValueNotifier<String> _testTextNotifier =
-      ValueNotifier<String>(dummyTestText);
-  static final ValueNotifier<RegexTestChoice> _testRegexSelectionNotifier =
-      ValueNotifier<RegexTestChoice>(RegexTestChoice.newRegex);
+  static final ValueNotifier<String> _testRegexNotifier = ValueNotifier<String>(defaultRegexForTest);
+  static final TextEditingController _controller = TextEditingController(text: defaultRegexForTest);
+  static final ValueNotifier<String> _testTextNotifier = ValueNotifier<String>(dummyTestText);
+  static final ValueNotifier<RegexTestChoice> _testRegexSelectionNotifier = ValueNotifier<RegexTestChoice>(RegexTestChoice.newRegex);
 
   @override
   Widget build(BuildContext context) {
     final ValueNotifier<String> regexValueNotifier =
         _regexValueNotifier(context);
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: defaultPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -32,6 +28,7 @@ class TestRegExWidget extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _regexTestTextWidget(BuildContext context) {
     return Expanded(
@@ -44,7 +41,7 @@ class TestRegExWidget extends StatelessWidget {
               builder: (BuildContext context, String value, Widget child) {
                 return FutureBuilder<List<TextSpan>>(
                   future: _highlightAccordingToRegex(context, value),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  builder: (BuildContext context, AsyncSnapshot<List<TextSpan>> snapshot) {
                     if (snapshot.hasError) {
                       print(snapshot.error);
                       return Text(
@@ -59,7 +56,7 @@ class TestRegExWidget extends StatelessWidget {
                             (BuildContext context, String value, Widget child) {
                           return SingleChildScrollView(
                             child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: defaultPadding,
                               child: RichText(
                                 text: TextSpan(children: snapshot.data),
                               ),
@@ -102,7 +99,7 @@ class TestRegExWidget extends StatelessWidget {
   ) =>
       Card(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: defaultPadding,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
