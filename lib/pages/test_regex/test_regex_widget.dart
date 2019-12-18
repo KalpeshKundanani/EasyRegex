@@ -45,6 +45,7 @@ class TestRegExWidget extends StatelessWidget {
       // Test view below RegEx input view.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           // Widget where user can enter RegEx or can use the
           // created RegEx in CreateRegEx module.
@@ -53,75 +54,87 @@ class TestRegExWidget extends StatelessWidget {
           // Widget that will be used to highlight the text that
           // is selected by the RegEx.
           _regexTestTextWidget(context),
+
+          // Widget used to let user paste their text on which they
+          // can test RegEx.
+          _pasteWidgetForTestText(context),
         ],
       ),
     );
   }
 
-  // TODO(kkundanani): improve this code.
-  Widget _regexTestTextWidget(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: ValueListenableBuilder<String>(
-              valueListenable: _testRegexNotifier,
-              builder: (BuildContext context, String value, Widget child) {
-                return FutureBuilder<List<TextSpan>>(
-                  future: _highlightAccordingToRegex(context, value),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<TextSpan>> snapshot) {
-                    if (snapshot.hasError) {
-                      print(snapshot.error);
-                      return Text(
-                        'Error parsing regex',
-                        style: TextStyle(color: Colors.redAccent),
-                      );
-                    }
-                    if (snapshot.hasData) {
-                      return ValueListenableBuilder<String>(
-                        valueListenable: _testTextNotifier,
-                        builder:
-                            (BuildContext context, String value, Widget child) {
-                          return SingleChildScrollView(
-                            child: Padding(
-                              padding: defaultPadding,
-                              child: RichText(
-                                text: TextSpan(children: snapshot.data),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    } else {
-                      return CircularProgressIndicator();
-                    }
-                  },
-                );
-              },
-            ),
+  // TODO(kkundanani): check if Row can be replaced with Align widget
+  Widget _pasteWidgetForTestText(BuildContext context) => Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Transform.scale(
+          scale: 0.75,
+          child: FloatingActionButton.extended(
+            icon: Icon(Icons.content_paste),
+            onPressed: () async {
+              _testTextNotifier.value = await textFromClipBoard();
+              showSnackBar(context, 'Updated test text.');
+            },
+            label: Text('Paste'),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Transform.scale(
-                scale: 0.75,
-                child: FloatingActionButton.extended(
-                  icon: Icon(Icons.content_paste),
-                  onPressed: () async {
-                    _testTextNotifier.value = await textFromClipBoard();
-                    showSnackBar(context, 'Updated test text.');
-                  },
-                  label: Text('Paste'),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+        ),
+      ],
     );
-  }
+
+  // TODO(kkundanani): improve this code.
+  Widget _regexTestTextWidget(BuildContext context) => ValueListenableBuilder<String>(
+    valueListenable: _testRegexNotifier,
+    builder: (BuildContext context, String value, Widget child) {
+      return FutureBuilder<List<TextSpan>>(
+        future: _highlightAccordingToRegex(context, value),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<TextSpan>> snapshot) {
+          if (snapshot.hasError) {
+            print(snapshot.error);
+            return _buildUIOnInvalidRegex(value);
+          }
+          if (snapshot.hasData) {
+            return Expanded(
+                          child: ValueListenableBuilder<String>(
+                valueListenable: _testTextNotifier,
+                builder:
+                    (BuildContext context, String value, Widget child) {
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: defaultPadding,
+                      child: RichText(
+                        text: TextSpan(children: snapshot.data),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          } else {
+            return _buildLoadingWidget();
+          }
+        },
+      );
+    },
+  );
+
+  Widget _buildLoadingWidget() => Padding(
+            padding: defaultPadding,
+            child: CircularProgressIndicator(),
+          );
+
+  Widget _buildUIOnInvalidRegex(String value) => SingleChildScrollView(
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Invalid RegEx', style: TextStyle(color:Colors.redAccent),),
+                Padding(
+                  padding: defaultPadding,
+                  child: Text(value),
+                ),
+              ],
+            ),
+    );
 
   Card _regexInputWidget(
     final BuildContext context,
