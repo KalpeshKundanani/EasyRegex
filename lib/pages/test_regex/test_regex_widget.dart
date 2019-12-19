@@ -53,7 +53,7 @@ class TestRegExWidget extends StatelessWidget {
 
           // Widget that will be used to highlight the text that
           // is selected by the RegEx.
-          _regexTestTextWidget(context),
+          _regexTestTextWidget(),
 
           // Widget used to let user paste their text on which they
           // can test RegEx.
@@ -65,76 +65,76 @@ class TestRegExWidget extends StatelessWidget {
 
   // TODO(kkundanani): check if Row can be replaced with Align widget
   Widget _pasteWidgetForTestText(BuildContext context) => Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Transform.scale(
-          scale: 0.75,
-          child: FloatingActionButton.extended(
-            icon: Icon(Icons.content_paste),
-            onPressed: () async {
-              _testTextNotifier.value = await textFromClipBoard();
-              showSnackBar(context, 'Updated test text.');
-            },
-            label: Text('Paste'),
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Transform.scale(
+            scale: 0.75,
+            child: FloatingActionButton.extended(
+              icon: Icon(Icons.content_paste),
+              onPressed: () async {
+                _testTextNotifier.value = await textFromClipBoard();
+                showSnackBar(context, 'Updated test text.');
+              },
+              label: Text('Paste'),
+            ),
           ),
-        ),
-      ],
-    );
-
-  // TODO(kkundanani): improve this code.
-  Widget _regexTestTextWidget(BuildContext context) => ValueListenableBuilder<String>(
-    valueListenable: _testRegexNotifier,
-    builder: (BuildContext context, String value, Widget child) {
-      return FutureBuilder<List<TextSpan>>(
-        future: _highlightAccordingToRegex(context, value),
-        builder: (BuildContext context,
-            AsyncSnapshot<List<TextSpan>> snapshot) {
-          if (snapshot.hasError) {
-            print(snapshot.error);
-            return _buildUIOnInvalidRegex(value);
-          }
-          if (snapshot.hasData) {
-            return Expanded(
-                          child: ValueListenableBuilder<String>(
-                valueListenable: _testTextNotifier,
-                builder:
-                    (BuildContext context, String value, Widget child) {
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: defaultPadding,
-                      child: RichText(
-                        text: TextSpan(children: snapshot.data),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          } else {
-            return _buildLoadingWidget();
-          }
-        },
+        ],
       );
-    },
-  );
+
+  /// Used for user to see which text is highlight when they enter
+  /// RegEx as input.
+  Widget _regexTestTextWidget() => ValueListenableBuilder<String>(
+        valueListenable: _testRegexNotifier,
+        builder: (final BuildContext context, final String value, _) =>
+            FutureBuilder<List<TextSpan>>(
+          future: _highlightAccordingToRegex(context, value),
+          builder: (_, AsyncSnapshot<List<TextSpan>> snapshot) =>
+              snapshot.hasError
+                  ? _buildInvalidRegexUI(value)
+                  : snapshot.hasData
+                      ? _buildTextHighlightWidget(snapshot.data)
+                      : _buildLoadingWidget(),
+        ),
+      );
+
+  Expanded _buildTextHighlightWidget(final List<TextSpan> _textSpans) {
+    return Expanded(
+      child: ValueListenableBuilder<String>(
+        valueListenable: _testTextNotifier,
+        builder: (BuildContext context, String value, Widget child) {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: defaultPadding,
+              child: RichText(
+                text: TextSpan(children: _textSpans),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildLoadingWidget() => Padding(
-            padding: defaultPadding,
-            child: CircularProgressIndicator(),
-          );
+        padding: defaultPadding,
+        child: CircularProgressIndicator(),
+      );
 
-  Widget _buildUIOnInvalidRegex(String value) => SingleChildScrollView(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text('Invalid RegEx', style: TextStyle(color:Colors.redAccent),),
-                Padding(
-                  padding: defaultPadding,
-                  child: Text(value),
-                ),
-              ],
+  Widget _buildInvalidRegexUI(String value) => SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Invalid RegEx',
+              style: TextStyle(color: Colors.redAccent),
             ),
-    );
+            Padding(
+              padding: defaultPadding,
+              child: Text(value),
+            ),
+          ],
+        ),
+      );
 
   Card _regexInputWidget(
     final BuildContext context,
@@ -290,58 +290,73 @@ class TestRegExWidget extends StatelessWidget {
         ),
       ];
 
+  /// Used to compile regex and match it on data.
+  /// returns the TextSpan with highlighted words.
   Future<List<TextSpan>> _highlightAccordingToRegex(
-    BuildContext context,
-    String value,
+    final BuildContext context,
+    final String regexValue,
   ) async {
-    String data = _testTextNotifier.value;
-    RegExp exp = new RegExp(value);
-    print(exp.hasMatch(data));
-    Iterable<RegExpMatch> matches = exp.allMatches(data);
-    List<String> toBeHighlightedWords = <String>[];
-    for (int i = 0; i < matches.length; i++) {
-      String word = matches.elementAt(i).group(0);
-      toBeHighlightedWords.add(word);
-    }
-    return _getHighlightedWords(context, data, toBeHighlightedWords);
+    final String testText = _testTextNotifier.value;
+    final RegExp regex = RegExp(regexValue);
+    final List<String> toBeHighlightedWords = regex
+        .allMatches(testText)
+        .map((final RegExpMatch match) => match.group(0))
+        .toList();
+    return _highlightMatchedWords(context, testText, toBeHighlightedWords);
   }
 
-  List<TextSpan> _getHighlightedWords(
-      BuildContext context, String text, List<String> toBeHighlighted) {
-    List<TextSpan> _textSpans = <TextSpan>[];
-    final TextStyle nonHighlight = Theme.of(context).textTheme.body2;
-    final TextStyle highlight = TextStyle(
-        color: Theme.of(context).accentColor,
-        fontSize: Theme.of(context).textTheme.body2.fontSize,
-        backgroundColor: Theme.of(context).accentColor.withAlpha(50));
-    int index = 0;
-    toBeHighlighted.forEach((String string) {
-      int indexOfHighlight = text.indexOf(string);
-      try {
-        String nonHighlightedString = text.substring(index, indexOfHighlight);
-        _textSpans
-            .add(TextSpan(text: nonHighlightedString, style: nonHighlight));
-      } catch (e) {
-        // print('$e ');
-      }
-      index = indexOfHighlight + string.length;
-      try {
-        String highlightedString = text.substring(indexOfHighlight, index);
-        _textSpans.add(TextSpan(text: highlightedString, style: highlight));
-      } catch (e) {
-        // print('$e');
-      }
-      text = text.substring(index);
-      index = 0;
+  /// highlights the words that are passed as matched and returns textspans
+  /// that has both highlighted and unhighlighted texts.
+  List<TextSpan> _highlightMatchedWords(
+    final BuildContext context,
+    String testText,
+    final List<String> matchedWords,
+  ) {
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
+    final Color accentColor = themeData.accentColor;
+    final TextStyle plainTextStyle = textTheme.body2;
+    final TextStyle highlightedTextStyle = TextStyle(
+        color: accentColor,
+        fontSize: textTheme.body2.fontSize,
+        backgroundColor: accentColor.withAlpha(50));
+    final List<TextSpan> _textSpans = <TextSpan>[];
+    matchedWords.forEach((final String string) {
+      int textCursor = 0;
+      // Plain text.
+      // jump till the start of the  string to be highlighted.
+      final int indexOfHighlight = testText.indexOf(string);
+      // take non highlight string and give it plain text style.
+      final String plainText = testText.substring(textCursor, indexOfHighlight);
+      // add it to List of text span so that it can be visible on screen.
+      _textSpans.add(TextSpan(text: plainText, style: plainTextStyle));
+
+      // Highlighted text.
+      // jump till the end of the string that is to be highlighted.
+      textCursor = indexOfHighlight + string.length;
+      // chop the string that is to be highlighted.
+      final String textToBeHighlight =
+          testText.substring(indexOfHighlight, textCursor);
+      // apply highlighted text style and
+      // add it to List of text span so that it can be visible on screen.
+      _textSpans
+          .add(TextSpan(text: textToBeHighlight, style: highlightedTextStyle));
+      // chop the string that is not processed.
+      testText = testText.substring(textCursor);
     });
-    if (text.isNotEmpty) {
-      _textSpans.add(TextSpan(text: text, style: nonHighlight));
+    // remaining string will be the string that will not have any string that is to be highlighted.
+    if (testText.isNotEmpty) {
+      // add it to List of text span so that it can be visible on screen.
+      _textSpans.add(TextSpan(text: testText, style: plainTextStyle));
     }
+    // return list containing both, highlighted and non=highlighted words.
     return _textSpans;
   }
 
-  String _regexValidator(String value) {
+  /// returns error message if the regex is invalid and null otherwise.
+  String _regexValidator(final String value) {
     try {
+      // throws format exception in case of invalid RegEx format.
       RegExp(value);
       return null;
     } catch (e) {
