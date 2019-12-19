@@ -1,26 +1,80 @@
-# Author Kalpesh Kundanani
-# Date: 17-12-2019
-
 include: package:pedantic/analysis_options.yaml
-
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "example/*"
+  strong-mode:
+    implicit-casts: false
+  errors:
+    invalid_use_of_protected_member: error
+    always_declare_return_types: error 
 linter:
   rules:
-    - camel_case_types #// forces camel case on variable names
-    - always_declare_return_types #// forces declaring return type for every method
-    - annotate_overrides #// forces the use of @override annotation when needed
-    - empty_constructor_bodies #// forces elimination of empty constructor body
-    - slash_for_doc_comments #// forces to use /// comments instead of /** comments for documentation
-    - unnecessary_brace_in_string_interps #// forces to omit additional braces in string interpolations, e.g. ${var} -> $var
-    - prefer_single_quotes #// forces the use of single quote strings rather than usual double quotes
-    - flutter_style_todos #// forces to use flutter style TODOs.e.g. // TODO (hjoshi): Demo TO DO
-    - prefer_final_fields #// forces to use final fields when declaring a practically immutable/unchanging variable
-    - prefer_final_in_for_each #// forces declaring variable as final in the for in loop
-    - prefer_final_locals #// forces to use final for local variable which are not modified later
-    - public_member_api_docs #// forces to declare documentation for api member variables(public)
-    - prefer_iterable_whereType #// forces `whereType` Operator instead of `where` operator
-    - always_specify_types #// forces to provide value type instead of just 'final', 'const' or 'var'
-    - iterable_contains_unrelated_type #// warns about accessing invalid type from a type defined collection, ex. list.contains('1'), where list = List<int>();
-    - avoid_relative_lib_imports #// forces absolute package path instead of relative path
-analyzer:
-#   exclude:
-#     - path/to/excluded/files/**
+    - always_declare_return_types
+    - annotate_overrides
+    - avoid_empty_else
+    - avoid_function_literals_in_foreach_calls
+    - avoid_init_to_null
+    - avoid_null_checks_in_equality_operators
+    - avoid_relative_lib_imports
+    - avoid_renaming_method_parameters
+    - avoid_return_types_on_setters
+    - avoid_returning_null
+    - avoid_types_as_parameter_names
+    - avoid_unused_constructor_parameters
+    - await_only_futures
+    - camel_case_types
+    - cancel_subscriptions
+    - comment_references
+    - constant_identifier_names
+    - control_flow_in_finally
+    - directives_ordering
+    - empty_catches
+    - empty_constructor_bodies
+    - empty_statements
+    - implementation_imports
+    - invariant_booleans
+    - iterable_contains_unrelated_type
+    - library_names
+    - library_prefixes
+    - list_remove_unrelated_type
+    - lines_longer_than_80_chars
+    - no_adjacent_strings_in_list
+    - no_duplicate_case_values
+    - non_constant_identifier_names
+    - null_closures
+    - omit_local_variable_types
+    - only_throw_errors
+    - overridden_fields
+    - package_api_docs
+    - package_names
+    - package_prefixed_library_names
+    - prefer_adjacent_string_concatenation
+    - prefer_collection_literals
+    - prefer_conditional_assignment
+    - prefer_contains
+    - prefer_equal_for_default_values
+    - prefer_final_fields
+    - prefer_initializing_formals
+    - prefer_interpolation_to_compose_strings
+    - prefer_is_empty
+    - prefer_is_not_empty
+    - prefer_single_quotes
+    - prefer_typing_uninitialized_variables
+    - recursive_getters
+    - slash_for_doc_comments
+    - test_types_in_equals
+    - throw_in_finally
+    - type_init_formals
+    - unawaited_futures
+    - unnecessary_brace_in_string_interps
+    - unnecessary_const
+    - unnecessary_getters_setters
+    - unnecessary_lambdas
+    - unnecessary_new
+    - unnecessary_null_aware_assignments
+    - unnecessary_statements
+    - unnecessary_this
+    - unrelated_type_equality_checks
+    - use_rethrow_when_possible
+    - valid_regexps
