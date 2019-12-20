@@ -3,6 +3,7 @@ import 'package:easy_regex/pages/create_regex/create_regex_widget.dart';
 import 'package:easy_regex/pages/test_regex/test_regex_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:in_app_update/in_app_update.dart';
 
 final Color _accentColor = Color.fromRGBO(245, 130, 37, 1);
 
@@ -16,6 +17,15 @@ class EasyRegExApp extends StatefulWidget {
 
 class _EasyRegExAppState extends State<EasyRegExApp> {
   int _pageSelection = 0;
+
+  @override
+  void initState() {
+    // todo(kkundanani): verify app update.
+    InAppUpdate.checkForUpdate()
+        .then((state) => InAppUpdate.performImmediateUpdate())
+        .catchError(print);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(

@@ -29,6 +29,6 @@ extension MatchOnExtension on MatchOn {
   String get valueForEnd => matchOnRegExEnd[this];
 }
 
-buildRegex() {
-  MatchOn matchOn = matchOnListenable.value;
+void buildRegex() {
+  final matchOn = matchOnListenable.value;
 }

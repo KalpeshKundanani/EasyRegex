@@ -1,1 +1,1 @@
-{"_info":"// This is a generated file; do not edit or check into version control.","dependencyGraph":[{"name":"clipboard_manager","dependencies":[]},{"name":"share","dependencies":[]}]}
+{"_info":"// This is a generated file; do not edit or check into version control.","dependencyGraph":[{"name":"clipboard_manager","dependencies":[]},{"name":"in_app_update","dependencies":[]},{"name":"share","dependencies":[]}]}
