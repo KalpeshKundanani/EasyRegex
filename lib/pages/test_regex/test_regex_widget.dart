@@ -18,15 +18,18 @@ enum RegexTestChoice {
 /// Some additional utilites are that user can copy, paste
 /// and share RegEx form user input text field.
 class TestRegExWidget extends StatelessWidget {
-  /// Notfier that is used for tracking changes in RegEx that is used for testing.
+  /// Notfier that is used for tracking changes in RegEx that is used for
+  /// testing.
   static final ValueNotifier<String> _testRegexNotifier =
       ValueNotifier<String>(defaultRegexForTest);
 
-  /// TextController that will be used to access value of the text that user will enter in TextField.
+  /// TextController that will be used to access value of the text that
+  /// user will enter in TextField.
   static final TextEditingController _textControllerForRegexInput =
       TextEditingController(text: defaultRegexForTest);
 
-  /// Notifier used for tracking changes in the text that is used to test RegEx uppon.
+  /// Notifier used for tracking changes in the text that is used to test
+  /// RegEx uppon.
   static final ValueNotifier<String> _testTextNotifier =
       ValueNotifier<String>(dummyTestText);
 
@@ -36,9 +39,9 @@ class TestRegExWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    /// Notifier used to track the changes in the RegEx created by user in Create RegEx module.
-    final ValueNotifier<String> regexValueNotifier =
-        _regexValueNotifier(context);
+    /// Notifier used to track the changes in the RegEx created by user in
+    /// Create RegEx module.
+    final regexValueNotifier = _regexValueNotifier(context);
     return Padding(
       // main Screen padding.
       padding: defaultPadding,
@@ -63,22 +66,20 @@ class TestRegExWidget extends StatelessWidget {
     );
   }
 
-  // TODO(kkundanani): check if Row can be replaced with Align widget
-  Widget _pasteWidgetForTestText(BuildContext context) => Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Transform.scale(
-            scale: 0.75,
-            child: FloatingActionButton.extended(
-              icon: Icon(Icons.content_paste),
-              onPressed: () async {
-                _testTextNotifier.value = await textFromClipBoard();
-                showSnackBar(context, 'Updated test text.');
-              },
-              label: Text('Paste'),
-            ),
+  /// Widget that is used to paste the text coppied by the user.
+  Widget _pasteWidgetForTestText(BuildContext context) => Align(
+        alignment: Alignment.bottomRight,
+        child: Transform.scale(
+          scale: 0.75,
+          child: FloatingActionButton.extended(
+            icon: Icon(Icons.content_paste),
+            onPressed: () async {
+              _testTextNotifier.value = await textFromClipBoard();
+              showSnackBar(context, 'Updated test text.');
+            },
+            label: Text('Paste'),
           ),
-        ],
+        ),
       );
 
   /// Used for user to see which text is highlight when they enter
@@ -97,29 +98,31 @@ class TestRegExWidget extends StatelessWidget {
         ),
       );
 
-  Expanded _buildTextHighlightWidget(final List<TextSpan> _textSpans) {
-    return Expanded(
-      child: ValueListenableBuilder<String>(
-        valueListenable: _testTextNotifier,
-        builder: (BuildContext context, String value, Widget child) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: defaultPadding,
-              child: RichText(
-                text: TextSpan(children: _textSpans),
+  /// Widget that shows the text highlighted according to RegEx.
+  Expanded _buildTextHighlightWidget(final List<TextSpan> _textSpans) =>
+      Expanded(
+        child: ValueListenableBuilder<String>(
+          valueListenable: _testTextNotifier,
+          builder: (BuildContext context, String value, Widget child) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: defaultPadding,
+                child: RichText(
+                  text: TextSpan(children: _textSpans),
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+            );
+          },
+        ),
+      );
 
+  /// Creates UI that represents loading.
   Widget _buildLoadingWidget() => Padding(
         padding: defaultPadding,
         child: CircularProgressIndicator(),
       );
 
+  /// Widget that informs user that the entered RegEx is not a valid RegEx.
   Widget _buildInvalidRegexUI(String value) => SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,6 +139,8 @@ class TestRegExWidget extends StatelessWidget {
         ),
       );
 
+  /// Widget where user can select what RegEx to use.
+  /// Utilis like copy, paste and share is shown for user entered RegEx.
   Card _regexInputWidget(
     final BuildContext context,
     final ValueNotifier<String> regexValueNotifier,
@@ -153,40 +158,37 @@ class TestRegExWidget extends StatelessWidget {
         ),
       );
 
+  /// Widget that allows user to select either the RegEx created by user in
+  /// Create RegEx module or the RegEx entered by user in the TextField.
   Widget _regexSelectionWidget(
     final BuildContext context,
     final ValueNotifier<String> regexValueNotifier,
   ) {
-    final Color activeColor = Theme.of(context).accentColor;
+    final activeColor = Theme.of(context).accentColor;
     return ValueListenableBuilder<RegexTestChoice>(
-      valueListenable: _testRegexSelectionNotifier,
-      builder: (_, final RegexTestChoice groupValue, __) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: _testSelections(context, groupValue, regexValueNotifier)
-              .map(
-                (final _RegexTestSelection selection) =>
+        valueListenable: _testRegexSelectionNotifier,
+        builder: (_, final RegexTestChoice groupValue, __) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _testSelections(context, groupValue, regexValueNotifier)
+                .map((final _RegexTestSelection selection) =>
                     selection.toRadioListTile(
-                  activeColor,
-                  groupValue,
-                  (final RegexTestChoice value) {
-                    if (value == RegexTestChoice.newRegex) {
-                      _testRegexNotifier.value =
-                          _textControllerForRegexInput.text;
-                    } else {
-                      _testRegexNotifier.value =
-                          _regexValueNotifier(context).value;
-                    }
-                    _testRegexSelectionNotifier.value = value;
-                  },
-                ),
-              )
-              .toList(growable: false),
-        );
-      },
-    );
+                      activeColor,
+                      groupValue,
+                      (final RegexTestChoice value) {
+                        if (value == RegexTestChoice.newRegex) {
+                          _testRegexNotifier.value =
+                              _textControllerForRegexInput.text;
+                        } else {
+                          _testRegexNotifier.value =
+                              _regexValueNotifier(context).value;
+                        }
+                        _testRegexSelectionNotifier.value = value;
+                      },
+                    ))
+                .toList(growable: false)));
   }
 
+  /// Copy, paste and share button.
   Widget _regexUtils(
     final BuildContext context,
     final ValueNotifier<String> regexValueNotifier,
@@ -197,9 +199,8 @@ class TestRegExWidget extends StatelessWidget {
         return ValueListenableBuilder<String>(
           valueListenable: _testRegexNotifier,
           builder: (_, final String newRegexValue, __) {
-            final bool shallCopyOrShare =
-                groupValue == RegexTestChoice.newRegex &&
-                    _textControllerForRegexInput.text.isNotEmpty;
+            final shallCopyOrShare = groupValue == RegexTestChoice.newRegex &&
+                _textControllerForRegexInput.text.isNotEmpty;
             return Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
@@ -229,6 +230,7 @@ class TestRegExWidget extends StatelessWidget {
     );
   }
 
+  
   Text _createdRegexOutputWidget(final RegexTestChoice groupValue,
           final ValueNotifier<String> regexValueNotifier) =>
       Text(regexValueNotifier.value);
@@ -236,13 +238,15 @@ class TestRegExWidget extends StatelessWidget {
   static FocusNode myFocusNode = FocusNode();
   final GlobalKey<FormState> _formStateKey = GlobalKey<FormState>();
 
+  /// TextField to allow user to write and check widget.
   Widget _newRegexInputWidget(
       final BuildContext context, final RegexTestChoice groupValue) {
     return ValueListenableBuilder<RegexTestChoice>(
       valueListenable: _testRegexSelectionNotifier,
       builder: (BuildContext context, RegexTestChoice selection, Widget child) {
-        if (selection == RegexTestChoice.newRegex)
+        if (selection == RegexTestChoice.newRegex) {
           FocusScope.of(context).requestFocus(myFocusNode);
+        }
         return Form(
           key: _formStateKey,
           child: TextFormField(
@@ -296,9 +300,9 @@ class TestRegExWidget extends StatelessWidget {
     final BuildContext context,
     final String regexValue,
   ) async {
-    final String testText = _testTextNotifier.value;
-    final RegExp regex = RegExp(regexValue);
-    final List<String> toBeHighlightedWords = regex
+    final testText = _testTextNotifier.value;
+    final regex = RegExp(regexValue);
+    final toBeHighlightedWords = regex
         .allMatches(testText)
         .map((final RegExpMatch match) => match.group(0))
         .toList();
@@ -312,30 +316,30 @@ class TestRegExWidget extends StatelessWidget {
     String testText,
     final List<String> matchedWords,
   ) {
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
-    final Color accentColor = themeData.accentColor;
-    final TextStyle plainTextStyle = textTheme.body2;
-    final TextStyle highlightedTextStyle = TextStyle(
+    final themeData = Theme.of(context);
+    final textTheme = themeData.textTheme;
+    final accentColor = themeData.accentColor;
+    final plainTextStyle = textTheme.body2;
+    final highlightedTextStyle = TextStyle(
         color: accentColor,
         fontSize: textTheme.body2.fontSize,
         backgroundColor: accentColor.withAlpha(50));
-    final List<TextSpan> _textSpans = <TextSpan>[];
-    matchedWords.forEach((final String string) {
-      int textCursor = 0;
+    final _textSpans = <TextSpan>[];
+    for (final match in matchedWords) {
+      var textCursor = 0;
       // Plain text.
       // jump till the start of the  string to be highlighted.
-      final int indexOfHighlight = testText.indexOf(string);
+      final indexOfHighlight = testText.indexOf(match);
       // take non highlight string and give it plain text style.
-      final String plainText = testText.substring(textCursor, indexOfHighlight);
+      final plainText = testText.substring(textCursor, indexOfHighlight);
       // add it to List of text span so that it can be visible on screen.
       _textSpans.add(TextSpan(text: plainText, style: plainTextStyle));
 
       // Highlighted text.
       // jump till the end of the string that is to be highlighted.
-      textCursor = indexOfHighlight + string.length;
+      textCursor = indexOfHighlight + match.length;
       // chop the string that is to be highlighted.
-      final String textToBeHighlight =
+      final textToBeHighlight =
           testText.substring(indexOfHighlight, textCursor);
       // apply highlighted text style and
       // add it to List of text span so that it can be visible on screen.
@@ -343,8 +347,9 @@ class TestRegExWidget extends StatelessWidget {
           .add(TextSpan(text: textToBeHighlight, style: highlightedTextStyle));
       // chop the string that is not processed.
       testText = testText.substring(textCursor);
-    });
-    // remaining string will be the string that will not have any string that is to be highlighted.
+    }
+    // remaining string will be the string that will not have any string
+    // that is to be highlighted.
     if (testText.isNotEmpty) {
       // add it to List of text span so that it can be visible on screen.
       _textSpans.add(TextSpan(text: testText, style: plainTextStyle));
