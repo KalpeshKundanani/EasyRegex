@@ -1,15 +1,15 @@
-import 'package:easy_regex/gui/regex_value_manager.dart';
 import 'package:easy_regex/regex_change_notifier_provider.dart';
 import 'package:easy_regex/utils.dart';
 import 'package:flutter/material.dart';
 
+import 'regex_value_manager.dart';
+
 class RegExOutputWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final ValueNotifier<String> regexValueNotifier =
-        _regexValueNotifier(context);
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
+    final regexValueNotifier = _regexValueNotifier(context);
+    final themeData = Theme.of(context);
+    final textTheme = themeData.textTheme;
     return Card(
         child: Padding(
       padding: const EdgeInsets.all(8.0),
