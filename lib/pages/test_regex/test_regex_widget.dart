@@ -230,7 +230,6 @@ class TestRegExWidget extends StatelessWidget {
     );
   }
 
-  
   Text _createdRegexOutputWidget(final RegexTestChoice groupValue,
           final ValueNotifier<String> regexValueNotifier) =>
       Text(regexValueNotifier.value);
