@@ -14,7 +14,7 @@ class Topic {
   }
 }
 
-const List<Topic> topics = const [
+const List<Topic> topics = <Topic>[
   Topic('Metacharacters escaped with \'\\\'', <String, String>{
     '<  (  [  {  \^  -  =  \$  !  |  ]  }  )  ?  *  +  .  >': ''
   }),

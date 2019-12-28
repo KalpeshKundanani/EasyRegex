@@ -18,7 +18,7 @@ class CheatSheetWidget extends StatelessWidget {
   }
 
   Card _topicToCard(BuildContext context, Topic topic) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
+    final textTheme = Theme.of(context).textTheme;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),

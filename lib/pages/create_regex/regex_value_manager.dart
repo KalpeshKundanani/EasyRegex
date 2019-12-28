@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 final ValueNotifier<MatchOn> matchOnListenable =
     ValueNotifier<MatchOn>(MatchOn.words);
+final ValueNotifier<String> startsWithListenable = ValueNotifier<String>('');
+final ValueNotifier<String> containsListenable = ValueNotifier<String>('');
+final ValueNotifier<String> endsWithListenable = ValueNotifier<String>('');
 
 const matchOn = <MatchOn, String>{
   MatchOn.words: 'Words',
@@ -29,6 +32,12 @@ extension MatchOnExtension on MatchOn {
   String get valueForEnd => matchOnRegExEnd[this];
 }
 
-void buildRegex() {
+String buildRegex() {
   final matchOn = matchOnListenable.value;
+  final matchOnStart = matchOn.valueForStart;
+  final matchOnEnd = matchOn.valueForEnd;
+  final startsWith = startsWithListenable.value;
+  final contains = containsListenable.value;
+  final endsWith = endsWithListenable.value;
+  return '$matchOnStart$startsWith.*$contains.*$endsWith$matchOnEnd';
 }

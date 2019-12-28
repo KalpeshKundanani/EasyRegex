@@ -71,7 +71,8 @@ class StartsWithWidget extends StatelessWidget {
                       symbolCheckNotifier.value.contains(Symbols.upperCase),
                   onChanged: (bool value) {
                     checkNotifier.value = CheckableItem.symbol;
-                    Set<Symbols> symbols = Set.from(symbolCheckNotifier.value);
+                    final symbols =
+                        Set<Symbols>.from(symbolCheckNotifier.value);
                     if (value) {
                       symbols.add(Symbols.upperCase);
                     } else {
@@ -88,7 +89,8 @@ class StartsWithWidget extends StatelessWidget {
                       symbolCheckNotifier.value.contains(Symbols.lowerCase),
                   onChanged: (bool value) {
                     checkNotifier.value = CheckableItem.symbol;
-                    Set<Symbols> symbols = Set.from(symbolCheckNotifier.value);
+                    final symbols =
+                        Set<Symbols>.from(symbolCheckNotifier.value);
                     if (value) {
                       symbols.add(Symbols.lowerCase);
                     } else {
@@ -105,7 +107,8 @@ class StartsWithWidget extends StatelessWidget {
                       symbolCheckNotifier.value.contains(Symbols.number),
                   onChanged: (bool value) {
                     checkNotifier.value = CheckableItem.symbol;
-                    Set<Symbols> symbols = Set.from(symbolCheckNotifier.value);
+                    final symbols =
+                        Set<Symbols>.from(symbolCheckNotifier.value);
                     if (value) {
                       symbols.add(Symbols.number);
                     } else {
@@ -122,7 +125,8 @@ class StartsWithWidget extends StatelessWidget {
                       symbolCheckNotifier.value.contains(Symbols.symbol),
                   onChanged: (bool value) {
                     checkNotifier.value = CheckableItem.symbol;
-                    Set<Symbols> symbols = Set.from(symbolCheckNotifier.value);
+                    final symbols =
+                        Set<Symbols>.from(symbolCheckNotifier.value);
                     if (value) {
                       symbols.add(Symbols.symbol);
                     } else {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 enum EndsWith {
   anything,
   endsWith,
-  does_not_contain,
+  doesNotContain,
   none,
 }
 
@@ -14,9 +14,9 @@ enum EndsWithText {
 }
 
 const Map<EndsWith, String> endsWithNameMap = <EndsWith, String>{
-  EndsWith.anything: "Anything",
-  EndsWith.endsWith: "Ends With...",
-  EndsWith.does_not_contain: "Does not ends with...",
+  EndsWith.anything: 'Anything',
+  EndsWith.endsWith: 'Ends With...',
+  EndsWith.doesNotContain: 'Does not ends with...',
 };
 
 extension EndsWithExtention on EndsWith {
@@ -24,14 +24,14 @@ extension EndsWithExtention on EndsWith {
 }
 
 class EndsWithWidget extends StatelessWidget {
-  ValueNotifier<EndsWith> checkNotifier =
+  final ValueNotifier<EndsWith> checkNotifier =
       ValueNotifier<EndsWith>(EndsWith.anything);
-  ValueNotifier<Set<EndsWithText>> endsWithCheckNotifier =
+  final ValueNotifier<Set<EndsWithText>> endsWithCheckNotifier =
       ValueNotifier<Set<EndsWithText>>(<EndsWithText>{});
 
   @override
   Widget build(BuildContext context) {
-    final Color accentColor = Theme.of(context).accentColor;
+    final accentColor = Theme.of(context).accentColor;
     return ValueListenableBuilder(
       valueListenable: endsWithCheckNotifier,
       builder: (BuildContext context, value, Widget child) {
@@ -68,8 +68,8 @@ class EndsWithWidget extends StatelessWidget {
                           .contains(EndsWithText.endsWith1),
                   onChanged: (bool value) {
                     checkNotifier.value = EndsWith.endsWith;
-                    Set<EndsWithText> symbols =
-                        Set.from(endsWithCheckNotifier.value);
+                    final symbols =
+                        Set<EndsWithText>.from(endsWithCheckNotifier.value);
                     if (value) {
                       symbols.add(EndsWithText.endsWith1);
                     } else {
@@ -103,8 +103,8 @@ class EndsWithWidget extends StatelessWidget {
                           .contains(EndsWithText.endsWith2),
                   onChanged: (bool value) {
                     checkNotifier.value = EndsWith.endsWith;
-                    Set<EndsWithText> symbols =
-                        Set.from(endsWithCheckNotifier.value);
+                    final symbols =
+                        Set<EndsWithText>.from(endsWithCheckNotifier.value);
                     if (value) {
                       symbols.add(EndsWithText.endsWith2);
                     } else {
@@ -138,8 +138,8 @@ class EndsWithWidget extends StatelessWidget {
                           .contains(EndsWithText.endsWith3),
                   onChanged: (bool value) {
                     checkNotifier.value = EndsWith.endsWith;
-                    Set<EndsWithText> symbols =
-                        Set.from(endsWithCheckNotifier.value);
+                    final symbols =
+                        Set<EndsWithText>.from(endsWithCheckNotifier.value);
                     if (value) {
                       symbols.add(EndsWithText.endsWith3);
                     } else {
@@ -162,16 +162,16 @@ class EndsWithWidget extends StatelessWidget {
                             focusColor: accentColor,
                             hoverColor: accentColor,
                             contentPadding: EdgeInsets.all(16),
-                            hintText: EndsWith.does_not_contain.name,
+                            hintText: EndsWith.doesNotContain.name,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  value: checkNotifier.value == EndsWith.does_not_contain,
+                  value: checkNotifier.value == EndsWith.doesNotContain,
                   onChanged: (bool value) {
                     checkNotifier.value =
-                        value ? EndsWith.does_not_contain : EndsWith.none;
+                        value ? EndsWith.doesNotContain : EndsWith.none;
                   },
                 ),
               ],

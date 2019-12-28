@@ -9,4 +9,4 @@ const String dummyTestText = '''<!DOCTYPE html>
 </body>
 </html>''';
 
-const String defaultRegexForTest = "<[^>]*>";
+const String defaultRegexForTest = '<[^>]*>';

@@ -6,7 +6,7 @@ import 'package:share/share.dart';
 /// Copies given text to the clipboard of the device.
 void copyToClipBoard(final BuildContext context, final String textToBeCopied) {
   ClipboardManager.copyToClipBoard(textToBeCopied).then((final bool isCopied) {
-    final String message =
+    final message =
         isCopied ? 'Copied to Clipboard' : 'Can\'t copy to the Clipboard';
     showSnackBar(context, message);
   });
@@ -14,14 +14,15 @@ void copyToClipBoard(final BuildContext context, final String textToBeCopied) {
 
 /// Returns String form the device's clipboard.
 Future<String> textFromClipBoard() async {
-  final ClipboardData data = await Clipboard.getData('text/plain');
+  final data = await Clipboard.getData('text/plain');
   return data.text;
 }
 
 /// Will show the options to share the text.
 void shareText(String textToBeShared) => Share.share(textToBeShared);
 
-/// Will show the snackbar, it is important that the context is of the child of the Scaffold
+/// Will show the snackbar, it is important that the context is of the child
+/// of the Scaffold
 void showSnackBar(final BuildContext context, final String message) =>
     Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
 

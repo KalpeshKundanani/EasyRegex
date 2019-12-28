@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 enum Contains {
   anything,
   contains,
-  does_not_contain,
+  doesNotContain,
   none,
 }
 
@@ -14,9 +14,9 @@ enum ContainsText {
 }
 
 const Map<Contains, String> containsNameMap = <Contains, String>{
-  Contains.anything: "Anything",
-  Contains.contains: "Contains...",
-  Contains.does_not_contain: "Does not contain...",
+  Contains.anything: 'Anything',
+  Contains.contains: 'Contains...',
+  Contains.doesNotContain: 'Does not contain...',
 };
 
 extension ContainsExtention on Contains {
@@ -31,7 +31,7 @@ class ContainsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color accentColor = Theme.of(context).accentColor;
+    final accentColor = Theme.of(context).accentColor;
     return ValueListenableBuilder(
       valueListenable: containsCheckNotifier,
       builder: (BuildContext context, value, Widget child) {
@@ -68,8 +68,8 @@ class ContainsWidget extends StatelessWidget {
                           .contains(ContainsText.contains1),
                   onChanged: (bool value) {
                     checkNotifier.value = Contains.contains;
-                    Set<ContainsText> symbols =
-                        Set.from(containsCheckNotifier.value);
+                    final symbols =
+                        Set<ContainsText>.from(containsCheckNotifier.value);
                     if (value) {
                       symbols.add(ContainsText.contains1);
                     } else {
@@ -103,8 +103,8 @@ class ContainsWidget extends StatelessWidget {
                           .contains(ContainsText.contains2),
                   onChanged: (bool value) {
                     checkNotifier.value = Contains.contains;
-                    Set<ContainsText> symbols =
-                        Set.from(containsCheckNotifier.value);
+                    final symbols =
+                        Set<ContainsText>.from(containsCheckNotifier.value);
                     if (value) {
                       symbols.add(ContainsText.contains2);
                     } else {
@@ -138,8 +138,8 @@ class ContainsWidget extends StatelessWidget {
                           .contains(ContainsText.contains3),
                   onChanged: (bool value) {
                     checkNotifier.value = Contains.contains;
-                    Set<ContainsText> symbols =
-                        Set.from(containsCheckNotifier.value);
+                    final symbols =
+                        Set<ContainsText>.from(containsCheckNotifier.value);
                     if (value) {
                       symbols.add(ContainsText.contains3);
                     } else {
@@ -162,16 +162,16 @@ class ContainsWidget extends StatelessWidget {
                             focusColor: accentColor,
                             hoverColor: accentColor,
                             contentPadding: EdgeInsets.all(16),
-                            hintText: Contains.does_not_contain.name,
+                            hintText: Contains.doesNotContain.name,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  value: checkNotifier.value == Contains.does_not_contain,
+                  value: checkNotifier.value == Contains.doesNotContain,
                   onChanged: (bool value) {
                     checkNotifier.value =
-                        value ? Contains.does_not_contain : Contains.none;
+                        value ? Contains.doesNotContain : Contains.none;
                   },
                 ),
               ],
