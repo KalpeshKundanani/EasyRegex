@@ -34,7 +34,7 @@ class _EasyRegExAppState extends State<EasyRegExApp> {
           appBar: _appBar,
           body: _currentPage,
           bottomNavigationBar: _bottomNavigationBar,
-          resizeToAvoidBottomPadding: false,
+          resizeToAvoidBottomPadding: true,
         ),
         debugShowCheckedModeBanner: false,
       );
