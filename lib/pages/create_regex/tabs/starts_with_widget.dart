@@ -1,160 +1,141 @@
+import 'package:easy_regex/pages/create_regex/regex_parameter.dart';
+import 'package:easy_regex/pages/create_regex/regex_value_manager.dart';
+import 'package:easy_regex/regex_change_notifier_provider.dart';
 import 'package:flutter/material.dart';
 
-enum CheckableItem {
-  anything,
-  symbol,
-  exact,
-  none,
+class StartsWithWidget extends StatefulWidget {
+  @override
+  _StartsWithWidgetState createState() => _StartsWithWidgetState();
 }
 
-const Map<CheckableItem, String> checkableItemNameMap = <CheckableItem, String>{
-  CheckableItem.anything: 'Anything',
-  CheckableItem.symbol: 'Symbol',
-  CheckableItem.exact: 'Excat',
-};
+class _StartsWithWidgetState extends State<StartsWithWidget> {
+  final List<RegexParameter> _startsWithRegexParameterList = [
+    RegexParameter(Text('Uppercase letter'), 'A-Z'),
+    RegexParameter(Text('Lowercase letter'), 'a-z'),
+    RegexParameter(Text('Number'), '0-9'),
+    RegexParameter(Text('Symbol'), '!-/:-@\\[-`\\{-~'),
+  ];
+  ValueNotifier<List<RegexParameter>> _startsWithListNotifier;
+  ValueNotifier<RegexParameter> _exactTextNotifier;
+  ValueNotifier<RegexParameter> _anyTextNotifier;
 
-const Map<Symbols, String> symbolsItemNameMap = <Symbols, String>{
-  Symbols.upperCase: 'Upper Case',
-  Symbols.lowerCase: 'Lower Case',
-  Symbols.number: 'Number',
-  Symbols.symbol: 'Symbol',
-};
+  Color _accentColor;
 
-extension CheckableItemExtension on CheckableItem {
-  String get name => checkableItemNameMap[this];
-}
+  @override
+  void initState() {
+    exactText = RegexParameter(TextField(
+      onChanged: (String value) {
+        exactText.regexValue = value;
+        exactText.isIncluded = true;
+        _exactTextNotifier.value = RegexParameter.from(exactText);
+      },
+    ), '');
+    _startsWithListNotifier =
+        ValueNotifier<List<RegexParameter>>(_startsWithRegexParameterList);
+    _exactTextNotifier = ValueNotifier<RegexParameter>(exactText);
+    _anyTextNotifier = ValueNotifier<RegexParameter>(defaultRegexParameter);
+    _startsWithListNotifier.addListener(() {
+      final listToRegex = parameterListToRegex(_startsWithListNotifier.value);
+      if (listToRegex.isNotEmpty) {
+        startsWithListenable.value = listToRegex;
+        _regexValueNotifier(context).value = buildRegex();
+      } else if (_exactTextNotifier.value.isIncluded) {
+        startsWithListenable.value = _exactTextNotifier.value.regexValue;
+        _regexValueNotifier(context).value = buildRegex();
+      } else if (_anyTextNotifier.value.isIncluded) {
+        startsWithListenable.value = _anyTextNotifier.value.regexValue;
+        _regexValueNotifier(context).value = buildRegex();
+      }
+    });
+    _exactTextNotifier.addListener(() {
+      if (_exactTextNotifier.value.isIncluded) {
+        startsWithListenable.value = _exactTextNotifier.value.regexValue;
+        _regexValueNotifier(context).value = buildRegex();
+      }
+    });
 
-extension SymbolsExtension on Symbols {
-  String get name => symbolsItemNameMap[this];
-}
+    _anyTextNotifier.addListener(() {
+      print(_anyTextNotifier.value);
+      if (_anyTextNotifier.value.isIncluded) {
+        startsWithListenable.value = '.*';
+        _regexValueNotifier(context).value = buildRegex();
+      }
+    });
+    super.initState();
+  }
 
-enum Symbols {
-  upperCase,
-  lowerCase,
-  number,
-  symbol,
-}
+  RegexParameter exactText;
 
-ValueNotifier<CheckableItem> checkNotifier =
-    ValueNotifier<CheckableItem>(CheckableItem.anything);
-ValueNotifier<Set<Symbols>> symbolCheckNotifier =
-    ValueNotifier<Set<Symbols>>(<Symbols>{});
+  ValueNotifier<String> _regexValueNotifier(BuildContext context) =>
+      RegexChangeNotifierProvider.of(context).regexValueNotifier;
 
-class StartsWithWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: symbolCheckNotifier,
-      builder: (BuildContext context, value, Widget child) {
-        return ValueListenableBuilder(
-          valueListenable: checkNotifier,
-          builder: (BuildContext context, value, Widget child) {
-            var accentColor = Theme.of(context).accentColor;
-            return Column(
-              children: <Widget>[
-                CheckboxListTile(
-                  dense: true,
-                  activeColor: accentColor,
-                  title: Text(CheckableItem.anything.name),
-                  value: checkNotifier.value == CheckableItem.anything,
-                  onChanged: (bool value) {
-                    checkNotifier.value =
-                        value ? CheckableItem.anything : CheckableItem.none;
-                    symbolCheckNotifier.value = <Symbols>{};
-                  },
-                ),
-                CheckboxListTile(
-                  dense: true,
-                  activeColor: accentColor,
-                  title: Text(Symbols.upperCase.name),
-                  value: checkNotifier.value == CheckableItem.symbol &&
-                      symbolCheckNotifier.value.contains(Symbols.upperCase),
-                  onChanged: (bool value) {
-                    checkNotifier.value = CheckableItem.symbol;
-                    final symbols =
-                        Set<Symbols>.from(symbolCheckNotifier.value);
-                    if (value) {
-                      symbols.add(Symbols.upperCase);
-                    } else {
-                      symbols.remove(Symbols.upperCase);
+    _accentColor = Theme.of(context).accentColor;
+    return ValueListenableBuilder<List<RegexParameter>>(
+      valueListenable: _startsWithListNotifier,
+      builder: (BuildContext context, List<RegexParameter> list, Widget child) {
+        return ListView.builder(
+          itemCount: list.length + 2,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0) {
+              return CheckboxListTile(
+                dense: true,
+                title: defaultRegexParameter.title,
+                activeColor: _accentColor,
+                value: defaultRegexParameter.isIncluded,
+                onChanged: (bool isChecked) {
+                  defaultRegexParameter.isIncluded = isChecked;
+                  if (isChecked) {
+                    for (final parameter in list) {
+                      parameter.isIncluded = false;
                     }
-                    symbolCheckNotifier.value = symbols;
-                  },
-                ),
-                CheckboxListTile(
-                  dense: true,
-                  activeColor: accentColor,
-                  title: Text(Symbols.lowerCase.name),
-                  value: checkNotifier.value == CheckableItem.symbol &&
-                      symbolCheckNotifier.value.contains(Symbols.lowerCase),
-                  onChanged: (bool value) {
-                    checkNotifier.value = CheckableItem.symbol;
-                    final symbols =
-                        Set<Symbols>.from(symbolCheckNotifier.value);
-                    if (value) {
-                      symbols.add(Symbols.lowerCase);
-                    } else {
-                      symbols.remove(Symbols.lowerCase);
-                    }
-                    symbolCheckNotifier.value = symbols;
-                  },
-                ),
-                CheckboxListTile(
-                  dense: true,
-                  activeColor: accentColor,
-                  title: Text(Symbols.number.name),
-                  value: checkNotifier.value == CheckableItem.symbol &&
-                      symbolCheckNotifier.value.contains(Symbols.number),
-                  onChanged: (bool value) {
-                    checkNotifier.value = CheckableItem.symbol;
-                    final symbols =
-                        Set<Symbols>.from(symbolCheckNotifier.value);
-                    if (value) {
-                      symbols.add(Symbols.number);
-                    } else {
-                      symbols.remove(Symbols.number);
-                    }
-                    symbolCheckNotifier.value = symbols;
-                  },
-                ),
-                CheckboxListTile(
-                  dense: true,
-                  activeColor: accentColor,
-                  title: Text(Symbols.symbol.name),
-                  value: checkNotifier.value == CheckableItem.symbol &&
-                      symbolCheckNotifier.value.contains(Symbols.symbol),
-                  onChanged: (bool value) {
-                    checkNotifier.value = CheckableItem.symbol;
-                    final symbols =
-                        Set<Symbols>.from(symbolCheckNotifier.value);
-                    if (value) {
-                      symbols.add(Symbols.symbol);
-                    } else {
-                      symbols.remove(Symbols.symbol);
-                    }
-                    symbolCheckNotifier.value = symbols;
-                  },
-                ),
-                CheckboxListTile(
-                  dense: true,
-                  activeColor: accentColor,
-                  title: TextFormField(
-                    cursorColor: accentColor,
-                    decoration: InputDecoration(
-                      focusColor: accentColor,
-                      hoverColor: accentColor,
-                      contentPadding: EdgeInsets.all(16),
-                      hintText: 'Exact text...',
-                    ),
-                  ),
-                  value: checkNotifier.value == CheckableItem.exact,
-                  onChanged: (bool value) {
-                    checkNotifier.value =
-                        value ? CheckableItem.exact : CheckableItem.none;
-                    symbolCheckNotifier.value = <Symbols>{};
-                  },
-                ),
-              ],
+                    exactText.isIncluded = false;
+                    _anyTextNotifier.value =
+                        RegexParameter.from(defaultRegexParameter);
+                    _startsWithListNotifier.value = List.from(list);
+                  }
+                },
+              );
+            }
+            if (index == (list.length + 1)) {
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return CheckboxListTile(
+                    dense: true,
+                    title: exactText.title,
+                    activeColor: _accentColor,
+                    value: exactText.isIncluded,
+                    onChanged: (bool isChecked) {
+                      setState(() {
+                        exactText.isIncluded = isChecked;
+                        if (isChecked) {
+                          for (final parameter in list) {
+                            parameter.isIncluded = false;
+                          }
+                          defaultRegexParameter.isIncluded = false;
+                          _startsWithListNotifier.value = List.from(list);
+                        }
+                      });
+                    },
+                  );
+                },
+              );
+            }
+
+            index = index - 1;
+            final parameter = list[index];
+            return CheckboxListTile(
+              dense: true,
+              title: parameter.title,
+              activeColor: _accentColor,
+              value: parameter.isIncluded,
+              onChanged: (bool value) {
+                parameter.isIncluded = value;
+                _startsWithListNotifier.value = List.from(list);
+                exactText.isIncluded = false;
+                defaultRegexParameter.isIncluded = false;
+              },
             );
           },
         );

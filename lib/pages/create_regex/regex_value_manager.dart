@@ -28,7 +28,9 @@ enum MatchOn {
 
 extension MatchOnExtension on MatchOn {
   String get name => matchOn[this];
+
   String get valueForStart => matchOnRegExStart[this];
+
   String get valueForEnd => matchOnRegExEnd[this];
 }
 
@@ -39,5 +41,19 @@ String buildRegex() {
   final startsWith = startsWithListenable.value;
   final contains = containsListenable.value;
   final endsWith = endsWithListenable.value;
-  return '$matchOnStart$startsWith.*$contains.*$endsWith$matchOnEnd';
+//  var regexValue = '$matchOnStart';
+  var regexValue = '';
+  if (startsWith != null) {
+    regexValue += '$startsWith.*';
+  }
+
+  if (contains != null && contains.isNotEmpty) {
+    regexValue += '$contains.*';
+  }
+
+  if (endsWith != null && endsWith.isNotEmpty) {
+    regexValue += '$endsWith';
+//    regexValue +=   '$matchOnEnd';
+  }
+  return regexValue;
 }

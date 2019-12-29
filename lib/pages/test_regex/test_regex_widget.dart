@@ -18,7 +18,7 @@ enum RegexTestChoice {
 /// Some additional utils are that user can copy, paste
 /// and share RegEx form user input text field.
 class TestRegExWidget extends StatelessWidget {
-  /// Notfier that is used for tracking changes in RegEx that is used for
+  /// Notifier that is used for tracking changes in RegEx that is used for
   /// testing.
   static final ValueNotifier<String> _testRegexNotifier =
       ValueNotifier<String>(defaultRegexForTest);
