@@ -7,12 +7,7 @@ class ContainsWidget extends StatefulWidget {
 
 class _ContainsWidgetState extends State<ContainsWidget> {
   Color _accentColor;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     _accentColor = Theme.of(context).accentColor;
@@ -35,6 +30,7 @@ class _ContainsWidgetState extends State<ContainsWidget> {
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
             return CheckboxListTile(
+              activeColor: _accentColor,
               title: Text(index.toString()),
               value: true,
               onChanged: (bool value) {},
@@ -49,7 +45,12 @@ class _ContainsWidgetState extends State<ContainsWidget> {
           itemCount: 5,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
-            return Text(index.toString());
+            return CheckboxListTile(
+              activeColor: _accentColor,
+              title: Text(index.toString()),
+              value: true,
+              onChanged: (bool value) {},
+            );
           },
         ),
       ],
