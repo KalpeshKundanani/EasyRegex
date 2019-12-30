@@ -7,14 +7,14 @@ class ContainsWidget extends StatefulWidget {
 }
 
 class _ContainsWidgetState extends State<ContainsWidget> {
-  Color _accentColor;
-
-  final List<RegexParameter> _containsRegexParameters = <RegexParameter>[];
-  final List<RegexParameter> _notContainsRegexParameters = <RegexParameter>[];
+  static final List<RegexParameter> _containsRegexParameters =
+      <RegexParameter>[];
+  static final List<RegexParameter> _notContainsRegexParameters =
+      <RegexParameter>[];
 
   @override
   Widget build(BuildContext context) {
-    _accentColor = Theme.of(context).accentColor;
+    final _accentColor = Theme.of(context).accentColor;
     return ListView(
       children: <Widget>[
         CheckboxListTile(
@@ -26,36 +26,67 @@ class _ContainsWidgetState extends State<ContainsWidget> {
         ),
         ParameterListCreator(
           title: 'Contains...',
-          onPressed: () {},
+          onPressed: () {
+            RegexParameter parameter;
+            final widget = TextField(
+              onChanged: (String value) {
+                parameter.regexValue = value;
+              },
+            );
+            parameter = RegexParameter(widget, '');
+            setState(() => _containsRegexParameters.add(parameter));
+          },
         ),
         ListView.builder(
           physics: NeverScrollableScrollPhysics(),
           itemCount: _containsRegexParameters.length,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
+            final parameter = _containsRegexParameters[index];
             return CheckboxListTile(
+              secondary: InkWell(
+                child: Icon(Icons.delete),
+                onTap: () =>
+                    setState(() => _containsRegexParameters.removeAt(index)),
+              ),
               activeColor: _accentColor,
-              title: Text(index.toString()),
-              value: true,
-              onChanged: (bool value) {},
+              title: parameter.title,
+              value: parameter.isIncluded,
+              onChanged: (bool value) =>
+                  setState(() => parameter.isIncluded = value),
             );
           },
         ),
         ParameterListCreator(
           title: 'But doesn\'t contain...',
           onPressed: () {
+            RegexParameter parameter;
+            final widget = TextField(
+              onChanged: (String value) {
+                parameter.regexValue = '(?<!$value)';
+              },
+            );
+            parameter = RegexParameter(widget, '');
+            setState(() => _notContainsRegexParameters.add(parameter));
           },
         ),
-        ListView.builder( 
-          physics: NeverScrollableScrollPhysics(),         
+        ListView.builder(
+          physics: NeverScrollableScrollPhysics(),
           itemCount: _notContainsRegexParameters.length,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
+            final parameter = _notContainsRegexParameters[index];
             return CheckboxListTile(
+              secondary: InkWell(
+                child: Icon(Icons.delete),
+                onTap: () =>
+                    setState(() => _notContainsRegexParameters.removeAt(index)),
+              ),
               activeColor: _accentColor,
-              title: Text(index.toString()),
-              value: true,
-              onChanged: (bool value) {},
+              title: parameter.title,
+              value: parameter.isIncluded,
+              onChanged: (bool value) =>
+                  setState(() => parameter.isIncluded = value),
             );
           },
         ),

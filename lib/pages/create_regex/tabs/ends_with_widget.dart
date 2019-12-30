@@ -8,9 +8,10 @@ class EndsWithWidget extends StatefulWidget {
 }
 
 class _EndsWithWidgetState extends State<EndsWithWidget> {
-
-  final List<RegexParameter> _containsRegexParameters = <RegexParameter>[];
-  final List<RegexParameter> _notContainsRegexParameters = <RegexParameter>[];
+  static final List<RegexParameter> _containsRegexParameters =
+      <RegexParameter>[];
+  static final List<RegexParameter> _notContainsRegexParameters =
+      <RegexParameter>[];
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +30,12 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
           onPressed: () {
             RegexParameter parameter;
             final widget = TextField(
-              onChanged: (String value){
+              onChanged: (String value) {
                 parameter.regexValue = value;
               },
             );
             parameter = RegexParameter(widget, '');
-            _containsRegexParameters.add(parameter);
+            setState(() => _containsRegexParameters.add(parameter));
           },
         ),
         ListView.builder(
@@ -44,12 +45,16 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
           itemBuilder: (BuildContext context, int index) {
             final parameter = _containsRegexParameters[index];
             return CheckboxListTile(
+              secondary: InkWell(
+                child: Icon(Icons.delete),
+                onTap: () =>
+                    setState(() => _containsRegexParameters.removeAt(index)),
+              ),
               activeColor: _accentColor,
               title: parameter.title,
               value: parameter.isIncluded,
-              onChanged: (bool value) {
-                parameter.isIncluded = value;
-              },
+              onChanged: (bool value) =>
+                  setState(() => parameter.isIncluded = value),
             );
           },
         ),
@@ -58,12 +63,12 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
           onPressed: () {
             RegexParameter parameter;
             final widget = TextField(
-              onChanged: (String value){
+              onChanged: (String value) {
                 parameter.regexValue = '(?<!$value)';
               },
             );
             parameter = RegexParameter(widget, '');
-            _notContainsRegexParameters.add(parameter);
+            setState(() => _notContainsRegexParameters.add(parameter));
           },
         ),
         ListView.builder(
@@ -73,12 +78,16 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
           itemBuilder: (BuildContext context, int index) {
             final parameter = _notContainsRegexParameters[index];
             return CheckboxListTile(
+              secondary: InkWell(
+                child: Icon(Icons.delete),
+                onTap: () =>
+                    setState(() => _notContainsRegexParameters.removeAt(index)),
+              ),
               activeColor: _accentColor,
               title: parameter.title,
               value: parameter.isIncluded,
-              onChanged: (bool value) {
-                parameter.isIncluded = value;
-              },
+              onChanged: (bool value) =>
+                  setState(() => parameter.isIncluded = value),
             );
           },
         ),
