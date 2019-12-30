@@ -1,3 +1,4 @@
+import 'package:easy_regex/pages/create_regex/regex_parameter.dart';
 import 'package:flutter/material.dart';
 
 class ContainsWidget extends StatefulWidget {
@@ -7,7 +8,10 @@ class ContainsWidget extends StatefulWidget {
 
 class _ContainsWidgetState extends State<ContainsWidget> {
   Color _accentColor;
-  
+
+  final List<RegexParameter> _containsRegexParameters = <RegexParameter>[];
+  final List<RegexParameter> _notContainsRegexParameters = <RegexParameter>[];
+
   @override
   Widget build(BuildContext context) {
     _accentColor = Theme.of(context).accentColor;
@@ -26,7 +30,7 @@ class _ContainsWidgetState extends State<ContainsWidget> {
         ),
         ListView.builder(
           physics: NeverScrollableScrollPhysics(),
-          itemCount: 5,
+          itemCount: _containsRegexParameters.length,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
             return CheckboxListTile(
@@ -39,10 +43,12 @@ class _ContainsWidgetState extends State<ContainsWidget> {
         ),
         ParameterListCreator(
           title: 'But doesn\'t contain...',
-          onPressed: () {},
+          onPressed: () {
+          },
         ),
-        ListView.builder(
-          itemCount: 5,
+        ListView.builder( 
+          physics: NeverScrollableScrollPhysics(),         
+          itemCount: _notContainsRegexParameters.length,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
             return CheckboxListTile(
