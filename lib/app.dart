@@ -10,32 +10,16 @@ import 'package:path_provider/path_provider.dart';
 
 final Color _accentColor = Color.fromRGBO(245, 130, 37, 1);
 
-class EasyRegExApp extends StatefulWidget {
-  @override
-  _EasyRegExAppState createState() {
-    _systemSettings();
-    return _EasyRegExAppState();
-  }
-}
-
-class _EasyRegExAppState extends State<EasyRegExApp> {
+@immutable
+class EasyRegExApp extends StatelessWidget {
   static const String _pageSelectionKey = 'selected_page';
   static const String _pageSelectionValueKey = 'page_selection_value';
-
-  @override
-  void initState() {
-    // todo(kkundanani): verify app update.
-    InAppUpdate.checkForUpdate()
-        .then((state) => InAppUpdate.performImmediateUpdate())
-        .catchError(print);
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
         theme: _themeData,
         home: FutureBuilder(
-          future: _initHive(),
+          future: _init(),
           builder: (_, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               return FutureBuilder<Box<int>>(
@@ -104,14 +88,26 @@ class _EasyRegExAppState extends State<EasyRegExApp> {
   List<BottomNavigationBarItem> get _navigablePages =>
       _appPages.map((_AppPage page) => page.navigationBarItem).toList();
 
-  Future<bool> _initHive() async {
+  Future<bool> _init() async {
+    _systemSettings();
     final appDocumentDir = await getApplicationDocumentsDirectory();
     Hive.init(appDocumentDir.path);
+    InAppUpdate.checkForUpdate()
+        .then((state) => InAppUpdate.performImmediateUpdate())
+        .catchError(print);
     return true;
   }
 
   Future<Box<int>> get _pageSelectionBox async =>
       await Hive.openBox<int>(_pageSelectionKey);
+
+  void _systemSettings() {
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Color.fromRGBO(48, 48, 48, 1)));
+  }
 }
 
 @immutable
@@ -139,11 +135,3 @@ final List<_AppPage> _appPages = <_AppPage>[
         icon: Icon(Icons.list), title: Text('Cheat Sheet')),
   ),
 ];
-
-void _systemSettings() {
-  SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Color.fromRGBO(48, 48, 48, 1)));
-}
