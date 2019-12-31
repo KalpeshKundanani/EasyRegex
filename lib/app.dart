@@ -3,7 +3,10 @@ import 'package:easy_regex/pages/create_regex/create_regex_widget.dart';
 import 'package:easy_regex/pages/test_regex/test_regex_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:path_provider/path_provider.dart';
 
 final Color _accentColor = Color.fromRGBO(245, 130, 37, 1);
 
@@ -16,7 +19,8 @@ class EasyRegExApp extends StatefulWidget {
 }
 
 class _EasyRegExAppState extends State<EasyRegExApp> {
-  int _pageSelection = 0;
+  static const String _pageSelectionKey = 'selected_page';
+  static const String _pageSelectionValueKey = 'page_selection_value';
 
   @override
   void initState() {
@@ -30,14 +34,53 @@ class _EasyRegExAppState extends State<EasyRegExApp> {
   @override
   Widget build(BuildContext context) => MaterialApp(
         theme: _themeData,
-        home: Scaffold(
-          appBar: _appBar,
-          body: _currentPage,
-          bottomNavigationBar: _bottomNavigationBar,
-          resizeToAvoidBottomPadding: true,
+        home: FutureBuilder(
+          future: _initHive(),
+          builder: (_, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              return FutureBuilder<Box<int>>(
+                future: _pageSelectionBox,
+                builder:
+                    (BuildContext context, AsyncSnapshot<Box<int>> snapshot) {
+                  if (snapshot.hasData) {
+                    return WatchBoxBuilder(
+                      box: snapshot.data,
+                      builder: (BuildContext context, Box box) {
+                        if (snapshot.hasData) {
+                          final _pageSelection = box.get(_pageSelectionValueKey,
+                              defaultValue: 0) as int;
+                          return Scaffold(
+                            appBar: _appBar,
+                            body: _appPages.elementAt(_pageSelection).body,
+                            bottomNavigationBar:
+                                _bottomNavigationBar(_pageSelection),
+                            resizeToAvoidBottomPadding: true,
+                          );
+                        } else {
+                          return _loadingWidget;
+                        }
+                      },
+                    );
+                  } else {
+                    return _loadingWidget;
+                  }
+                },
+              );
+            } else {
+              return _loadingWidget;
+            }
+          },
         ),
         debugShowCheckedModeBanner: false,
       );
+
+  Material get _loadingWidget {
+    return Material(
+      child: Center(
+        child: Text('Loading...'),
+      ),
+    );
+  }
 
   ThemeData get _themeData => ThemeData(
         brightness: Brightness.dark,
@@ -48,21 +91,27 @@ class _EasyRegExAppState extends State<EasyRegExApp> {
 
   AppBar get _appBar => AppBar(title: Text('Easy RegEx'));
 
-  Widget get _currentPage => _appPages.elementAt(_pageSelection).body;
-
-  BottomNavigationBar get _bottomNavigationBar => BottomNavigationBar(
+  BottomNavigationBar _bottomNavigationBar(int _pageSelection) =>
+      BottomNavigationBar(
         items: _navigablePages,
         currentIndex: _pageSelection,
         selectedItemColor: _accentColor,
-        onTap: (int index) {
-          setState(() {
-            _pageSelection = index;
-          });
+        onTap: (int index) async {
+          await (await _pageSelectionBox).put(_pageSelectionValueKey, index);
         },
       );
 
   List<BottomNavigationBarItem> get _navigablePages =>
       _appPages.map((_AppPage page) => page.navigationBarItem).toList();
+
+  Future<bool> _initHive() async {
+    final appDocumentDir = await getApplicationDocumentsDirectory();
+    Hive.init(appDocumentDir.path);
+    return true;
+  }
+
+  Future<Box<int>> get _pageSelectionBox async =>
+      await Hive.openBox<int>(_pageSelectionKey);
 }
 
 @immutable

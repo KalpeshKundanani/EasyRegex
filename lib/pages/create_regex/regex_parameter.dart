@@ -1,6 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
-class RegexParameter {
+class RegexParameter extends Equatable {
   final Widget title;
   String regexValue = '';
   bool isIncluded = false;
@@ -16,17 +17,7 @@ class RegexParameter {
   String toString() => '{title: $title, isIncluded: $isIncluded}';
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RegexParameter &&
-          runtimeType == other.runtimeType &&
-          title == other.title &&
-          regexValue == other.regexValue &&
-          isIncluded == other.isIncluded;
-
-  @override
-  int get hashCode =>
-      title.hashCode ^ regexValue.hashCode ^ isIncluded.hashCode;
+  List<Object> get props => [title, isIncluded];
 }
 
 String parameterListToRegex(List<RegexParameter> list) {

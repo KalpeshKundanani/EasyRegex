@@ -234,7 +234,6 @@ class TestRegExWidget extends StatelessWidget {
           final ValueNotifier<String> regexValueNotifier) =>
       Text(regexValueNotifier.value);
 
-  static FocusNode myFocusNode = FocusNode();
   final GlobalKey<FormState> _formStateKey = GlobalKey<FormState>();
 
   /// TextField to allow user to write and check widget.
@@ -243,14 +242,10 @@ class TestRegExWidget extends StatelessWidget {
     return ValueListenableBuilder<RegexTestChoice>(
       valueListenable: _testRegexSelectionNotifier,
       builder: (BuildContext context, RegexTestChoice selection, Widget child) {
-        if (selection == RegexTestChoice.newRegex) {
-          FocusScope.of(context).requestFocus(myFocusNode);
-        }
         return Form(
           key: _formStateKey,
           child: TextFormField(
             controller: _textControllerForRegexInput,
-            focusNode: myFocusNode,
             enabled: selection == RegexTestChoice.newRegex,
             onSaved: (String value) {
               _testRegexNotifier.value = value;
