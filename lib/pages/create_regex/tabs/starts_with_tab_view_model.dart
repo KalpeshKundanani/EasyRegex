@@ -26,6 +26,7 @@ class StartsWithTabViewModel {
         ValueNotifier<List<RegexParameter>>(startsWithParameterList);
 
     startsWithListNotifier.addListener(() {
+      repository.saveStartsWithList(startsWithListNotifier.value);
       final listToRegex = parameterListToRegex(startsWithListNotifier.value);
       if (listToRegex.isNotEmpty) {
         startsWithListenable.value = listToRegex;
@@ -44,8 +45,10 @@ class StartsWithTabViewModel {
     final exactTextParameter = await repository.getExactTextParameter();
     exactTextNotifier = ValueNotifier<RegexParameter>(exactTextParameter);
     exactTextNotifier.addListener(() {
-      if (exactTextNotifier.value.isIncluded) {
-        startsWithListenable.value = exactTextNotifier.value.regexValue;
+      var regexParameter = exactTextNotifier.value;
+      repository.saveExactTextParameter(regexParameter);
+      if (regexParameter.isIncluded) {
+        startsWithListenable.value = regexParameter.regexValue;
         regexValueNotifier.value = buildRegex();
       }
     });
@@ -55,8 +58,10 @@ class StartsWithTabViewModel {
     final anyTextParameter = await repository.getAnyTextParameter();
     anyTextNotifier = ValueNotifier<RegexParameter>(anyTextParameter);
     anyTextNotifier.addListener(() {
-      print(anyTextNotifier.value);
-      if (anyTextNotifier.value.isIncluded) {
+      var regexParameter = anyTextNotifier.value;
+      print(regexParameter);
+      repository.saveAnyTextParameter(regexParameter);
+      if (regexParameter.isIncluded) {
         startsWithListenable.value = '.*';
         regexValueNotifier.value = buildRegex();
       }
