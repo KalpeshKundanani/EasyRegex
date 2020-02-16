@@ -1,12 +1,23 @@
+import 'package:easy_regex/hive_utils.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
 
+part 'regex_parameter.g.dart';
+
+@HiveType(typeId: regexParameterTypeId)
 class RegexParameter extends Equatable {
-  final Widget title;
-  String regexValue = '';
-  bool isIncluded = false;
+  @HiveField(0)
+  String title;
+  @HiveField(1)
+  String regexValue;
+  @HiveField(2)
+  bool isIncluded;
 
-  RegexParameter(this.title, this.regexValue);
+  RegexParameter([
+    this.title = '',
+    this.regexValue = '',
+    this.isIncluded = false,
+  ]);
 
   factory RegexParameter.from(RegexParameter other) {
     return RegexParameter(other.title, '${other.regexValue}')
@@ -14,7 +25,7 @@ class RegexParameter extends Equatable {
   }
 
   @override
-  String toString() => '{title: $title, isIncluded: $isIncluded}';
+  String toString() => regexValue;
 
   @override
   List<Object> get props => [title, isIncluded];
@@ -30,5 +41,5 @@ String parameterListToRegex(List<RegexParameter> list) {
   return '[$joinedRegExValues]';
 }
 
-final defaultRegexParameter = RegexParameter(Text('Anything'), '');
+final defaultRegexParameter = RegexParameter('Anything', '');
 final defaultRegexParameterList = <RegexParameter>[defaultRegexParameter];

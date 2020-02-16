@@ -1,5 +1,7 @@
 import 'package:easy_regex/pages/create_regex/regex_parameter.dart';
+import 'package:easy_regex/pages/create_regex/regex_value_manager.dart';
 import 'package:easy_regex/pages/create_regex/tabs/contains_widget.dart';
+import 'package:easy_regex/regex_change_notifier_provider.dart';
 import 'package:flutter/material.dart';
 
 class EndsWithWidget extends StatefulWidget {
@@ -27,16 +29,7 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
         ),
         ParameterListCreator(
           title: 'Contains...',
-          onPressed: () {
-            RegexParameter parameter;
-            final widget = TextField(
-              onChanged: (String value) {
-                parameter.regexValue = value;
-              },
-            );
-            parameter = RegexParameter(widget, '');
-            setState(() => _containsRegexParameters.add(parameter));
-          },
+          onPressed: _createParameter,
         ),
         ListView.builder(
           physics: NeverScrollableScrollPhysics(),
@@ -47,11 +40,20 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
             return CheckboxListTile(
               secondary: InkWell(
                 child: Icon(Icons.delete),
-                onTap: () =>
-                    setState(() => _containsRegexParameters.removeAt(index)),
+                onTap: () {
+                  setState(() => _containsRegexParameters.removeAt(index));
+                  _createRegex(context);
+                },
               ),
               activeColor: _accentColor,
-              title: parameter.title,
+              title: TextFormField(
+                initialValue: parameter.title,
+                onChanged: (String value) {
+                  parameter.regexValue = value;
+                  print('parameter.regexValue: ${parameter.regexValue}');
+                  _createRegex(context);
+                },
+              ),
               value: parameter.isIncluded,
               onChanged: (bool value) =>
                   setState(() => parameter.isIncluded = value),
@@ -62,12 +64,7 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
           title: 'But doesn\'t contain...',
           onPressed: () {
             RegexParameter parameter;
-            final widget = TextField(
-              onChanged: (String value) {
-                parameter.regexValue = '(?<!$value)';
-              },
-            );
-            parameter = RegexParameter(widget, '');
+            parameter = RegexParameter();
             setState(() => _notContainsRegexParameters.add(parameter));
           },
         ),
@@ -80,11 +77,20 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
             return CheckboxListTile(
               secondary: InkWell(
                 child: Icon(Icons.delete),
-                onTap: () =>
-                    setState(() => _notContainsRegexParameters.removeAt(index)),
+                onTap: () {
+                  setState(() => _notContainsRegexParameters.removeAt(index));
+                  _createRegex(context);
+                },
               ),
               activeColor: _accentColor,
-              title: parameter.title,
+              title: TextFormField(
+                initialValue: parameter.title,
+                onChanged: (String value) {
+                  parameter.regexValue = value;
+                  print('parameter.regexValue: ${parameter.regexValue}');
+                  _createRegex(context);
+                },
+              ),
               value: parameter.isIncluded,
               onChanged: (bool value) =>
                   setState(() => parameter.isIncluded = value),
@@ -93,5 +99,35 @@ class _EndsWithWidgetState extends State<EndsWithWidget> {
         ),
       ],
     );
+  }
+
+  void _createParameter() {
+    RegexParameter parameter;
+    parameter = RegexParameter();
+    setState(() {
+      _containsRegexParameters.add(parameter);
+      print('_containsRegexParameters: $_containsRegexParameters');
+    });
+  }
+
+  ValueNotifier<String> _regexValueNotifier(BuildContext context) =>
+      RegexChangeNotifierProvider.of(context).regexValueNotifier;
+
+  void _createRegex(BuildContext context) {
+    var regex = '';
+    var hasNotContainsParameters = _notContainsRegexParameters != null &&
+        _notContainsRegexParameters.isNotEmpty;
+    if (hasNotContainsParameters) {
+      regex += '(?<!.*${_notContainsRegexParameters.join('|')})';
+    }
+    if (_containsRegexParameters != null &&
+        _containsRegexParameters.isNotEmpty) {
+      if (hasNotContainsParameters) {
+        regex += '.*';
+      }
+      regex += '(${_containsRegexParameters.join('|')})';
+    }
+    endsWithListenable.value = regex;
+    _regexValueNotifier(context).value = buildRegex();
   }
 }

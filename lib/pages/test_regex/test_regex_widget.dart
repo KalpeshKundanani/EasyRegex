@@ -1,6 +1,7 @@
 import 'package:easy_regex/regex_change_notifier_provider.dart';
 import 'package:easy_regex/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'test_text.dart';

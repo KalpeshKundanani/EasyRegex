@@ -88,14 +88,26 @@ class RegExOutputWidget extends StatelessWidget {
   ) =>
       ValueListenableBuilder<String>(
         valueListenable: regexValueNotifier,
-        builder: (_, final String value, __) => Padding(
-          padding:
-              const EdgeInsets.only(top: 8, bottom: 8, left: 16, right: 16),
-          child: Text(
-            regexValueNotifier.value,
-            style: textTheme.display1,
-          ),
-        ),
+        builder: (BuildContext context, final String value, __) {
+          double textSize = getRegexOutputTextSize(value);
+          return Padding(
+            padding:
+                const EdgeInsets.only(top: 8, bottom: 8, left: 16, right: 16),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: 25.0,
+                maxHeight: MediaQuery.of(context).size.height * 0.15,
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  value,
+                  style: TextStyle(fontSize: textSize),
+                  overflow: TextOverflow.visible,
+                ),
+              ),
+            ),
+          );
+        },
       );
 
   IconButton _shareRegexButton(ValueNotifier<String> regexValueNotifier) =>
@@ -114,4 +126,14 @@ class RegExOutputWidget extends StatelessWidget {
           copyToClipBoard(context, regexValueNotifier.value);
         },
       );
+
+  double getRegexOutputTextSize(String value) {
+    final length = value.length;
+    if (length < 30) return 34.0;
+    if (length < 50) return 24.0;
+    if (length < 70) return 20.0;
+    if (length < 90) return 16.0;
+    if (length < 120) return 14.0;
+    return 12.0;
+  }
 }
