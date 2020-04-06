@@ -10,3 +10,4 @@ const String dummyTestText = '''<!DOCTYPE html>
 </html>''';
 
 const String defaultRegexForTest = '<[^>]*>';
+const String defaultRegexForCreateRegex = '[a-z].*';

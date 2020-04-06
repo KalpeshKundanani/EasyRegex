@@ -1,4 +1,4 @@
-package com.example.easy_regex
+package com.kalpeshkundanani.easy_regex
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

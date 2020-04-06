@@ -19,7 +19,8 @@ class RegexParameterAdapter extends TypeAdapter<RegexParameter> {
     return RegexParameter(
       fields[0] as String,
       fields[1] as String,
-    )..isIncluded = fields[2] as bool;
+      fields[2] as bool,
+    );
   }
 
   @override

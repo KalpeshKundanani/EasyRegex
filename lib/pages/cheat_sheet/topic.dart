@@ -18,7 +18,7 @@ const List<Topic> topics = <Topic>[
   Topic('Metacharacters escaped with \'\\\'', <String, String>{
     '<  (  [  {  \^  -  =  \$  !  |  ]  }  )  ?  *  +  .  >': ''
   }),
-  Topic('Special Groups\nAnd Characters', <String, String>{
+  Topic('Special Groups And Characters', <String, String>{
     '[:upper:]': 'Uppercase',
     '[:lower:]': 'Lowercase',
     '[:alpha:]': 'Any letter',
@@ -29,7 +29,7 @@ const List<Topic> topics = <Topic>[
     '[:word:]': 'Letter, _, digit',
     '[:cntrl:]': 'Control char',
   }),
-  Topic('Groups\nAnd\nRanges', <String, String>{
+  Topic('Groups And Ranges', <String, String>{
     '[abc]': 'Range(a,b or c)',
     '[^abc]': 'Not a,b or c',
     '[a-f]': 'Any char a through f',
@@ -43,7 +43,7 @@ const List<Topic> topics = <Topic>[
     '.': 'Any Character',
     '*': 'Zero or more',
     '+': 'One or more',
-    '?': 'Zerio or one',
+    '?': 'Zero or one',
     '{n}': 'n times',
     '{n,}': 'n or more',
     '{n,m}': 'n to m times',

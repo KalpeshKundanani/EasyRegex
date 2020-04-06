@@ -24,15 +24,19 @@ class TestRegExWidget extends StatelessWidget {
   static final ValueNotifier<String> _testRegexNotifier =
       ValueNotifier<String>(defaultRegexForTest);
 
+  static final List<String> _testRegexStack = [defaultRegexForTest];
+
   /// TextController that will be used to access value of the text that
   /// user will enter in TextField.
   static final TextEditingController _textControllerForRegexInput =
       TextEditingController(text: defaultRegexForTest);
 
   /// Notifier used for tracking changes in the text that is used to test
-  /// RegEx uppon.
+  /// RegEx upon.
   static final ValueNotifier<String> _testTextNotifier =
       ValueNotifier<String>(dummyTestText);
+
+  static final List<String> _testTextStack = [dummyTestText];
 
   /// Notifier used to track value of user's choice of RegexTestChoice.
   static final ValueNotifier<RegexTestChoice> _testRegexSelectionNotifier =
@@ -72,76 +76,156 @@ class TestRegExWidget extends StatelessWidget {
         alignment: Alignment.bottomRight,
         child: Transform.scale(
           scale: 0.75,
-          child: FloatingActionButton.extended(
-            icon: Icon(Icons.content_paste),
-            onPressed: () async {
-              _testTextNotifier.value = await textFromClipBoard();
-              showSnackBar(context, 'Updated test text.');
-            },
-            label: Text('Paste'),
+          alignment: Alignment.bottomRight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ValueListenableBuilder(
+                    valueListenable: _testTextNotifier,
+                    builder: (_, __, ___) {
+                      return Visibility(
+                        visible: _testTextStack.length > 1,
+                        child: FloatingActionButton.extended(
+                          icon: Icon(Icons.undo),
+                          onPressed: _undoTestTextValue,
+                          label: Text('Undo'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FloatingActionButton.extended(
+                    icon: Icon(Icons.edit),
+                    onPressed: () async {
+                      final editedValue = await _getEditedStringInputFromDialog(
+                        context,
+                        _testTextNotifier.value,
+                      );
+                      final isNotEmpty =
+                          editedValue != null && editedValue.isNotEmpty;
+
+                      if (isNotEmpty &&
+                          editedValue != _testTextNotifier.value) {
+                        _testTextValue = editedValue;
+                        showSnackBar(context, 'Updated test text.');
+                      }
+                    },
+                    label: Text('Edit'),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FloatingActionButton.extended(
+                    icon: Icon(Icons.content_paste),
+                    onPressed: () async {
+                      final confirmationText = 'Are you sure you want to '
+                          'replace the current test text?';
+                      final shouldReplaceTestText =
+                          await _getConfirmationFromUser(
+                              context, confirmationText);
+                      if (shouldReplaceTestText ?? false) {
+                        _testTextValue = await textFromClipBoard();
+                        showSnackBar(context, 'Updated test text.');
+                      }
+                    },
+                    label: Text('Paste'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+      );
+
+  Future<String> _getEditedStringInputFromDialog(
+      BuildContext context, String currentText) async {
+    final controller = TextEditingController(text: currentText);
+    return await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Edit Text'),
+        content: TextField(
+          controller: controller,
+          maxLines: 10,
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Done'),
+            onPressed: () {
+              Navigator.of(dialogContext).pop(controller.text);
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<bool> _getConfirmationFromUser(
+    BuildContext context,
+    String confirmationText,
+  ) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            actions: <Widget>[
+              _alertDialogAction(dialogContext, 'No', false),
+              _alertDialogAction(dialogContext, 'Yes', true),
+            ],
+            title: Text(confirmationText),
+          );
+        },
+      );
+
+  Widget _alertDialogAction(
+    BuildContext dialogContext,
+    String buttonText,
+    bool result,
+  ) =>
+      FlatButton(
+        onPressed: () => Navigator.of(dialogContext).pop(result),
+        child: Text(buttonText),
       );
 
   /// Used for user to see which text is highlight when they enter
   /// RegEx as input.
   Widget _regexTestTextWidget() => ValueListenableBuilder<String>(
         valueListenable: _testRegexNotifier,
-        builder: (final BuildContext context, final String value, _) =>
-            FutureBuilder<List<TextSpan>>(
-          future: _highlightAccordingToRegex(context, value),
-          builder: (_, AsyncSnapshot<List<TextSpan>> snapshot) =>
-              snapshot.hasError
-                  ? _buildInvalidRegexUI(value)
-                  : snapshot.hasData
-                      ? _buildTextHighlightWidget(snapshot.data)
-                      : _buildLoadingWidget(),
-        ),
-      );
-
-  /// Widget that shows the text highlighted according to RegEx.
-  Expanded _buildTextHighlightWidget(final List<TextSpan> _textSpans) =>
-      Expanded(
-        child: ValueListenableBuilder<String>(
-          valueListenable: _testTextNotifier,
-          builder: (BuildContext context, String value, Widget child) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: defaultPadding,
-                child: RichText(
-                  text: TextSpan(children: _textSpans),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-
-  /// Creates UI that represents loading.
-  Widget _buildLoadingWidget() => Padding(
-        padding: defaultPadding,
-        child: CircularProgressIndicator(),
-      );
-
-  /// Widget that informs user that the entered RegEx is not a valid RegEx.
-  Widget _buildInvalidRegexUI(String value) => SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Invalid RegEx',
-              style: TextStyle(color: Colors.redAccent),
+        builder: (final BuildContext context, final String testRegexValue, _) {
+          return Expanded(
+            child: ValueListenableBuilder<String>(
+              valueListenable: _testTextNotifier,
+              builder: (_, String testTextValue, __) {
+                final textSpans = _highlightAccordingToRegex(
+                  context,
+                  testRegexValue,
+                  testTextValue,
+                );
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: defaultPadding,
+                    child: RichText(
+                      text: TextSpan(children: textSpans),
+                    ),
+                  ),
+                );
+              },
             ),
-            Padding(
-              padding: defaultPadding,
-              child: Text(value),
-            ),
-          ],
-        ),
+          );
+        },
       );
 
   /// Widget where user can select what RegEx to use.
-  /// Utilis like copy, paste and share is shown for user entered RegEx.
+  /// Utils like copy, paste and share is shown for user entered RegEx.
   Card _regexInputWidget(
     final BuildContext context,
     final ValueNotifier<String> regexValueNotifier,
@@ -171,22 +255,47 @@ class TestRegExWidget extends StatelessWidget {
         builder: (_, final RegexTestChoice groupValue, __) => Column(
             mainAxisSize: MainAxisSize.min,
             children: _testSelections(context, groupValue, regexValueNotifier)
-                .map((final _RegexTestSelection selection) =>
-                    selection.toRadioListTile(
-                      activeColor,
-                      groupValue,
-                      (final RegexTestChoice value) {
-                        if (value == RegexTestChoice.newRegex) {
-                          _testRegexNotifier.value =
-                              _textControllerForRegexInput.text;
-                        } else {
-                          _testRegexNotifier.value =
-                              _regexValueNotifier(context).value;
-                        }
-                        _testRegexSelectionNotifier.value = value;
-                      },
-                    ))
-                .toList(growable: false)));
+                .map((final _RegexTestSelection selection) {
+              if (selection.value == RegexTestChoice.createdRegex &&
+                  groupValue == selection.value) {
+                _testRegexValue = _regexValueNotifier(context).value;
+              }
+              return selection.toRadioListTile(
+                activeColor,
+                groupValue,
+                (final RegexTestChoice value) {
+                  if (value == RegexTestChoice.newRegex) {
+                    _testRegexValue = _textControllerForRegexInput.text;
+                  } else {
+                    _testRegexValue = _regexValueNotifier(context).value;
+                  }
+                  _testRegexSelectionNotifier.value = value;
+                },
+              );
+            }).toList(growable: false)));
+  }
+
+  set _testRegexValue(String string) {
+    _testRegexStack.add(string);
+    _testRegexNotifier.value = string;
+  }
+
+  void _undoTestRegexValue() {
+    _testRegexStack.removeLast();
+    final lastElement = _testRegexStack.last;
+    _textControllerForRegexInput.text = lastElement;
+    _testRegexNotifier.value = lastElement;
+    print('_undoTestRegexValue: lastElement: $lastElement');
+  }
+
+  set _testTextValue(String string) {
+    _testTextStack.add(string);
+    _testTextNotifier.value = string;
+  }
+
+  void _undoTestTextValue() {
+    _testTextStack.removeLast();
+    _testTextNotifier.value = _testTextStack.last;
   }
 
   /// Copy, paste and share button.
@@ -205,17 +314,40 @@ class TestRegExWidget extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                IconButton(
-                  onPressed: () async => _textControllerForRegexInput.text =
-                      await textFromClipBoard(),
-                  icon: Icon(Icons.content_paste),
+                ValueListenableBuilder(
+                  valueListenable: _testRegexNotifier,
+                  builder: (_, __, ___) {
+                    return Visibility(
+                      visible: _testRegexStack.length > 1,
+                      child: IconButton(
+                        onPressed: _undoTestRegexValue,
+                        icon: Icon(Icons.undo),
+                      ),
+                    );
+                  },
                 ),
                 IconButton(
-                  onPressed: shallCopyOrShare
-                      ? () => copyToClipBoard(
-                          context, _textControllerForRegexInput.text)
-                      : null,
-                  icon: Icon(Icons.content_copy),
+                  onPressed: () async {
+                    final confirmationText =
+                        'Are you sure you want to replace the current regex?';
+                    final shouldReplaceRegex = await _getConfirmationFromUser(
+                        context, confirmationText);
+                    if (shouldReplaceRegex ?? false) {
+                      _textControllerForRegexInput.text =
+                          await textFromClipBoard();
+                    }
+                  },
+                  icon: Icon(Icons.content_paste),
+                ),
+                Visibility(
+                  visible: false,
+                  child: IconButton(
+                    onPressed: shallCopyOrShare
+                        ? () => copyToClipBoard(
+                            context, _textControllerForRegexInput.text)
+                        : null,
+                    icon: Icon(Icons.content_copy),
+                  ),
                 ),
                 IconButton(
                   onPressed: shallCopyOrShare
@@ -249,7 +381,7 @@ class TestRegExWidget extends StatelessWidget {
             controller: _textControllerForRegexInput,
             enabled: selection == RegexTestChoice.newRegex,
             onSaved: (String value) {
-              _testRegexNotifier.value = value;
+              _testRegexValue = value;
             },
             onChanged: (String value) {
               if (_formStateKey.currentState.validate()) {
@@ -262,7 +394,7 @@ class TestRegExWidget extends StatelessWidget {
               child: Icon(Icons.clear),
               onTap: () {
                 _textControllerForRegexInput.clear();
-                _testRegexNotifier.value = '';
+                _testRegexValue = '';
               },
             )),
           ),
@@ -291,17 +423,17 @@ class TestRegExWidget extends StatelessWidget {
 
   /// Used to compile regex and match it on data.
   /// returns the TextSpan with highlighted words.
-  Future<List<TextSpan>> _highlightAccordingToRegex(
+  List<TextSpan> _highlightAccordingToRegex(
     final BuildContext context,
     final String regexValue,
-  ) async {
-    final testText = _testTextNotifier.value;
+    final String testTextValue,
+  ) {
     final regex = RegExp(regexValue);
     final toBeHighlightedWords = regex
-        .allMatches(testText)
+        .allMatches(testTextValue)
         .map((final RegExpMatch match) => match.group(0))
         .toList();
-    return _highlightMatchedWords(context, testText, toBeHighlightedWords);
+    return _highlightMatchedWords(context, testTextValue, toBeHighlightedWords);
   }
 
   /// highlights the words that are passed as matched and returns textspans
@@ -314,10 +446,10 @@ class TestRegExWidget extends StatelessWidget {
     final themeData = Theme.of(context);
     final textTheme = themeData.textTheme;
     final accentColor = themeData.accentColor;
-    final plainTextStyle = textTheme.body2;
+    final plainTextStyle = textTheme.bodyText1;
     final highlightedTextStyle = TextStyle(
         color: accentColor,
-        fontSize: textTheme.body2.fontSize,
+        fontSize: textTheme.bodyText1.fontSize,
         backgroundColor: accentColor.withAlpha(50));
     final _textSpans = <TextSpan>[];
     for (final match in matchedWords) {

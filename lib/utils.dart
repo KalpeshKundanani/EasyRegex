@@ -1,15 +1,15 @@
-import 'package:clipboard_manager/clipboard_manager.dart';
+//import 'package:clipboard_manager/clipboard_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share/share.dart';
 
 /// Copies given text to the clipboard of the device.
 void copyToClipBoard(final BuildContext context, final String textToBeCopied) {
-  ClipboardManager.copyToClipBoard(textToBeCopied).then((final bool isCopied) {
-    final message =
-        isCopied ? 'Copied to Clipboard' : 'Can\'t copy to the Clipboard';
-    showSnackBar(context, message);
-  });
+//  ClipboardManager.copyToClipBoard(textToBeCopied).then((final bool isCopied) {
+//    final message =
+//        isCopied ? 'Copied to Clipboard' : 'Can\'t copy to the Clipboard';
+//  });
+  showSnackBar(context, 'Feature Coming soon..');
 }
 
 /// Returns String form the device's clipboard.

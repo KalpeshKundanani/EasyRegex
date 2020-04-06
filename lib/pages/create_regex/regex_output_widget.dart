@@ -2,9 +2,19 @@ import 'package:easy_regex/regex_change_notifier_provider.dart';
 import 'package:easy_regex/utils.dart';
 import 'package:flutter/material.dart';
 
-import 'regex_value_manager.dart';
+import 'match_on.dart';
 
 class RegExOutputWidget extends StatelessWidget {
+  final ValueNotifier<MatchOn> matchOnListenable;
+  final Function(MatchOn) onMatchOnSelectionChange;
+
+  RegExOutputWidget({
+    Key key,
+    @required MatchOn matchOn,
+    @required this.onMatchOnSelectionChange,
+  })  : matchOnListenable = ValueNotifier<MatchOn>(matchOn),
+        super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final regexValueNotifier = _regexValueNotifier(context);
@@ -34,7 +44,7 @@ class RegExOutputWidget extends StatelessWidget {
   Widget _matchOnSelectionWidget(TextTheme textTheme, ThemeData themeData) {
     return ValueListenableBuilder<MatchOn>(
       valueListenable: matchOnListenable,
-      builder: (_, MatchOn value, __) {
+      builder: (BuildContext context, MatchOn value, __) {
         return Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Row(
@@ -49,13 +59,11 @@ class RegExOutputWidget extends StatelessWidget {
                   activeColor: themeData.accentColor,
                   title: Text(
                     MatchOn.words.name,
-                    style: textTheme.subtitle,
+                    style: textTheme.subtitle2,
                   ),
                   value: MatchOn.words,
                   groupValue: value,
-                  onChanged: (MatchOn value) {
-                    matchOnListenable.value = MatchOn.words;
-                  },
+                  onChanged: _onMatchOnSelected,
                 ),
               ),
               Expanded(
@@ -63,13 +71,11 @@ class RegExOutputWidget extends StatelessWidget {
                   activeColor: themeData.accentColor,
                   title: Text(
                     MatchOn.lines.name,
-                    style: textTheme.subtitle,
+                    style: textTheme.subtitle2,
                   ),
                   value: MatchOn.lines,
                   groupValue: value,
-                  onChanged: (MatchOn value) {
-                    matchOnListenable.value = MatchOn.lines;
-                  },
+                  onChanged: _onMatchOnSelected,
                 ),
               ),
             ],
@@ -77,6 +83,11 @@ class RegExOutputWidget extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _onMatchOnSelected(MatchOn value) {
+    matchOnListenable.value = value;
+    onMatchOnSelectionChange(value);
   }
 
   ValueNotifier<String> _regexValueNotifier(BuildContext context) =>
@@ -89,7 +100,6 @@ class RegExOutputWidget extends StatelessWidget {
       ValueListenableBuilder<String>(
         valueListenable: regexValueNotifier,
         builder: (BuildContext context, final String value, __) {
-          double textSize = getRegexOutputTextSize(value);
           return Padding(
             padding:
                 const EdgeInsets.only(top: 8, bottom: 8, left: 16, right: 16),
@@ -98,13 +108,9 @@ class RegExOutputWidget extends StatelessWidget {
                 minHeight: 25.0,
                 maxHeight: MediaQuery.of(context).size.height * 0.15,
               ),
-              child: SingleChildScrollView(
-                child: Text(
-                  value,
-                  style: TextStyle(fontSize: textSize),
-                  overflow: TextOverflow.visible,
-                ),
-              ),
+              child: value == null || value.isEmpty
+                  ? Container(height: 0)
+                  : FittedBox(child: Text(value, maxLines: 1)),
             ),
           );
         },
@@ -118,16 +124,21 @@ class RegExOutputWidget extends StatelessWidget {
         },
       );
 
-  IconButton _copyRegexButton(final BuildContext context,
-          ValueNotifier<String> regexValueNotifier) =>
-      IconButton(
+  Widget _copyRegexButton(
+      final BuildContext context, ValueNotifier<String> regexValueNotifier) {
+    return Visibility(
+      visible: false,
+      child: IconButton(
         icon: Icon(Icons.content_copy),
         onPressed: () {
           copyToClipBoard(context, regexValueNotifier.value);
         },
-      );
+      ),
+    );
+  }
 
   double getRegexOutputTextSize(String value) {
+    if (value == null || value.isEmpty) return 12.0;
     final length = value.length;
     if (length < 30) return 34.0;
     if (length < 50) return 24.0;

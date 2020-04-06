@@ -3,15 +3,9 @@ import 'package:flutter/material.dart';
 
 class RegexChangeNotifierProvider extends InheritedWidget {
   final ValueNotifier<String> regexValueNotifier;
-  final ValueNotifier<String> testRegexNotifier;
-  final ValueNotifier<String> testTextNotifier;
-  final ValueNotifier<RegexTestChoice> testRegexSelectionNotifier;
 
   const RegexChangeNotifierProvider({
     this.regexValueNotifier,
-    this.testRegexNotifier,
-    this.testRegexSelectionNotifier,
-    this.testTextNotifier,
     Key key,
     @required Widget child,
   })  : assert(child != null),

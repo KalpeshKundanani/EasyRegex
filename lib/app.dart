@@ -1,14 +1,14 @@
 import 'package:easy_regex/hive_utils.dart';
 import 'package:easy_regex/pages/cheat_sheet/cheat_sheet_widget.dart';
 import 'package:easy_regex/pages/create_regex/create_regex_widget.dart';
+import 'package:easy_regex/pages/create_regex/regex_change_notification.dart';
+import 'package:easy_regex/pages/create_regex/regex_parameter_change_notification.dart';
 import 'package:easy_regex/pages/test_regex/test_regex_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:in_app_update/in_app_update.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pedantic/pedantic.dart';
 
 final Color _accentColor = Color.fromRGBO(245, 130, 37, 1);
 
@@ -94,9 +94,6 @@ class EasyRegExApp extends StatelessWidget {
     _systemSettings();
     final appDocumentDir = await getApplicationDocumentsDirectory();
     Hive.init(appDocumentDir.path);
-    unawaited(InAppUpdate.checkForUpdate()
-        .then((state) => InAppUpdate.performImmediateUpdate())
-        .catchError(print));
 
     registerHiveAdapter();
     return true;
@@ -124,7 +121,18 @@ class _AppPage {
 
 final List<_AppPage> _appPages = <_AppPage>[
   _AppPage(
-    body: CreateRegExWidget(),
+    body: Builder(
+      builder: (context) {
+        return NotificationListener<RegexParameterChangeNotification>(
+          onNotification: (RegexParameterChangeNotification notification) {
+            final regexValue = convertNotificationToRegex(notification);
+            RegexChangeNotification(regexValue).dispatch(context);
+            return true;
+          },
+          child: CreateRegExWidget(),
+        );
+      },
+    ),
     navigationBarItem:
         BottomNavigationBarItem(icon: Icon(Icons.edit), title: Text('Create')),
   ),
@@ -139,3 +147,16 @@ final List<_AppPage> _appPages = <_AppPage>[
         icon: Icon(Icons.list), title: Text('Cheat Sheet')),
   ),
 ];
+
+RegexParameterChangeNotification currentNotification;
+
+String convertNotificationToRegex(
+  RegexParameterChangeNotification notification,
+) {
+  if (currentNotification == null) {
+    currentNotification = notification;
+  } else {
+    currentNotification.consume(notification);
+  }
+  return currentNotification.calculate();
+}
